@@ -14,7 +14,182 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      inventory_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          archetype_class: string | null
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archetype_class?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archetype_class?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      quarterly_visions: {
+        Row: {
+          created_at: string
+          id: string
+          quarter_label: string
+          updated_at: string
+          user_id: string
+          vision_text: string | null
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          quarter_label: string
+          updated_at?: string
+          user_id: string
+          vision_text?: string | null
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          quarter_label?: string
+          updated_at?: string
+          user_id?: string
+          vision_text?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
+      quests: {
+        Row: {
+          category_stat_id: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          impact: number
+          quarter: string | null
+          reflection: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_stat_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          impact?: number
+          quarter?: string | null
+          reflection?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_stat_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          impact?: number
+          quarter?: string | null
+          reflection?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quests_category_stat_id_fkey"
+            columns: ["category_stat_id"]
+            isOneToOne: false
+            referencedRelation: "stat_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stat_definitions: {
+        Row: {
+          color: string | null
+          created_at: string
+          current_value: number
+          icon: string | null
+          id: string
+          max_value: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          current_value?: number
+          icon?: string | null
+          id?: string
+          max_value?: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          current_value?: number
+          icon?: string | null
+          id?: string
+          max_value?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
