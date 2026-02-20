@@ -95,6 +95,23 @@ export function useQuestCount() {
   });
 }
 
+export function useInventoryItems() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["inventory", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("inventory_items")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useInventoryCount() {
   const { user } = useAuth();
   return useQuery({
@@ -107,6 +124,49 @@ export function useInventoryCount() {
         .eq("user_id", user!.id);
       if (error) throw error;
       return count ?? 0;
+    },
+  });
+}
+
+export function useAddInventoryItem() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (item: { name: string; quantity?: number; category?: string; description?: string }) => {
+      const { error } = await supabase.from("inventory_items").insert({ ...item, user_id: user!.id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["inventory"] });
+      qc.invalidateQueries({ queryKey: ["inventory-count"] });
+    },
+  });
+}
+
+export function useUpdateInventoryItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; name?: string; quantity?: number; category?: string; description?: string }) => {
+      const { error } = await supabase.from("inventory_items").update(updates).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["inventory"] });
+      qc.invalidateQueries({ queryKey: ["inventory-count"] });
+    },
+  });
+}
+
+export function useDeleteInventoryItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("inventory_items").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["inventory"] });
+      qc.invalidateQueries({ queryKey: ["inventory-count"] });
     },
   });
 }
