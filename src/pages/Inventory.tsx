@@ -46,7 +46,7 @@ function ItemForm({
   submitLabel: string;
 }) {
   const [name, setName] = useState(initial?.name ?? "");
-  const [quantity, setQuantity] = useState(initial?.quantity ?? 0);
+  const [quantity, setQuantity] = useState(String(initial?.quantity ?? 0));
   const [category, setCategory] = useState(initial?.category ?? "General");
   const [description, setDescription] = useState(initial?.description ?? "");
 
@@ -58,7 +58,7 @@ function ItemForm({
       </div>
       <div className="space-y-2">
         <Label>Quantity</Label>
-        <Input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+        <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
       </div>
       <div className="space-y-2">
         <Label>Category</Label>
@@ -77,7 +77,7 @@ function ItemForm({
       </div>
       <div className="flex gap-2 justify-end">
         <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button onClick={() => { if (!name.trim()) { toast.error("Name is required"); return; } onSubmit({ name, quantity, category, description }); }}>
+        <Button onClick={() => { if (!name.trim()) { toast.error("Name is required"); return; } onSubmit({ name, quantity: Number(quantity) || 0, category, description }); }}>
           {submitLabel}
         </Button>
       </div>
@@ -94,13 +94,14 @@ export default function Inventory() {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
   const handleAdd = (data: { name: string; quantity: number; category: string; description: string }) => {
+    if (addItem.isPending) return;
     addItem.mutate(data, {
       onSuccess: () => { setAddOpen(false); toast.success("Item added!"); },
     });
   };
 
   const handleUpdate = (data: { name: string; quantity: number; category: string; description: string }) => {
-    if (!editingItem) return;
+    if (!editingItem || updateItem.isPending) return;
     updateItem.mutate({ id: editingItem.id, ...data }, {
       onSuccess: () => { setEditingItem(null); toast.success("Item updated!"); },
     });
