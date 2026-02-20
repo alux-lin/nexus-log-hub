@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sword } from "lucide-react";
+import { Loader2, Sword, MailCheck } from "lucide-react";
 
 export default function Auth() {
   const { session, loading } = useAuth();
@@ -16,6 +16,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   if (loading) return null;
   if (session) return <Navigate to="/" replace />;
@@ -35,10 +36,7 @@ export default function Auth() {
           },
         });
         if (error) throw error;
-        toast({
-          title: "Account created!",
-          description: "Check your email to confirm your account.",
-        });
+        setEmailSent(true);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -49,6 +47,37 @@ export default function Auth() {
       setSubmitting(false);
     }
   };
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage:
+              "linear-gradient(hsl(var(--gold)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--gold)) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="relative w-full max-w-sm text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 border border-gold/30 mb-6">
+            <MailCheck className="w-8 h-8 text-gold" />
+          </div>
+          <h1 className="font-display text-2xl font-bold text-foreground mb-2">Check your email</h1>
+          <p className="text-muted-foreground mb-8">
+            We've sent a confirmation link to <span className="text-foreground font-medium">{email}</span>. Click the link to activate your account.
+          </p>
+          <Button
+            variant="outline"
+            className="border-border text-muted-foreground hover:text-foreground"
+            onClick={() => { setEmailSent(false); setMode("login"); }}
+          >
+            Back to Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
