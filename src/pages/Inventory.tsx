@@ -58,7 +58,7 @@ function ItemForm({
       </div>
       <div className="space-y-2">
         <Label>Quantity</Label>
-        <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+        <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} onBlur={() => setQuantity(String(Number(quantity) || 0))} />
       </div>
       <div className="space-y-2">
         <Label>Category</Label>
