@@ -116,6 +116,8 @@ export type Database = {
           impact: number
           quarter: string | null
           reflection: string | null
+          status: string
+          target_completion_date: string | null
           title: string
           updated_at: string
           user_id: string
@@ -128,6 +130,8 @@ export type Database = {
           impact?: number
           quarter?: string | null
           reflection?: string | null
+          status?: string
+          target_completion_date?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -140,6 +144,8 @@ export type Database = {
           impact?: number
           quarter?: string | null
           reflection?: string | null
+          status?: string
+          target_completion_date?: string | null
           title?: string
           updated_at?: string
           user_id?: string

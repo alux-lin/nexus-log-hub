@@ -79,17 +79,36 @@ export function useUpdateStat() {
   });
 }
 
-export function useQuests() {
+export function useActiveQuests() {
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["quests", user?.id],
+    queryKey: ["quests", "active", user?.id],
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("quests")
         .select("*, stat_definitions(name, color)")
         .eq("user_id", user!.id)
+        .eq("status", "active")
         .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCompletedQuests() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["quests", "completed", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quests")
+        .select("*, stat_definitions(name, color)")
+        .eq("user_id", user!.id)
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -112,16 +131,38 @@ export function useQuestCount() {
   });
 }
 
-export function useAddQuest() {
+export function useStartQuest() {
   const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (quest: { title: string; category_stat_id?: string | null; impact?: number; reflection?: string | null; quarter?: string | null }) => {
+    mutationFn: async (quest: { title: string; category_stat_id?: string | null; target_completion_date?: string | null }) => {
+      const now = new Date();
+      const quarter = `Q${Math.ceil((now.getMonth() + 1) / 3)} ${now.getFullYear()}`;
       const { error } = await supabase.from("quests").insert({
         ...quest,
         user_id: user!.id,
-        completed_at: new Date().toISOString(),
+        status: "active",
+        quarter,
       });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quests"] });
+      qc.invalidateQueries({ queryKey: ["quest-count"] });
+    },
+  });
+}
+
+export function useCompleteQuest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, impact, reflection }: { id: string; impact: number; reflection: string | null }) => {
+      const { error } = await supabase.from("quests").update({
+        status: "completed",
+        impact,
+        reflection,
+        completed_at: new Date().toISOString(),
+      }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
