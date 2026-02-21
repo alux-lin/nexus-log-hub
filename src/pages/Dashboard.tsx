@@ -16,7 +16,8 @@ export default function Dashboard() {
   const initStats = useInitDefaultStats();
   const { data: questCount } = useQuestCount();
   const { data: inventoryCount } = useInventoryCount();
-  const { data: visionText } = useCurrentVision();
+  const { data: currentVision } = useCurrentVision();
+  const visionText = currentVision?.vision_text ?? null;
 
   // Auto-init default stats for new users
   useEffect(() => {
