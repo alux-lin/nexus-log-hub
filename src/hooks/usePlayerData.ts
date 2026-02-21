@@ -273,13 +273,65 @@ export function useCurrentVision() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("quarterly_visions")
-        .select("vision_text")
+        .select("*")
         .eq("user_id", user!.id)
         .eq("quarter_label", quarter)
         .eq("year", year)
         .maybeSingle();
       if (error) throw error;
-      return data?.vision_text ?? null;
+      return data;
+    },
+  });
+}
+
+export function useAllVisions() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["visions", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quarterly_visions")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("year", { ascending: false })
+        .order("quarter_label", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useSaveVision() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ quarter_label, year, vision_text }: { quarter_label: string; year: number; vision_text: string }) => {
+      // Check if vision exists
+      const { data: existing } = await supabase
+        .from("quarterly_visions")
+        .select("id")
+        .eq("user_id", user!.id)
+        .eq("quarter_label", quarter_label)
+        .eq("year", year)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("quarterly_visions")
+          .update({ vision_text })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("quarterly_visions")
+          .insert({ user_id: user!.id, quarter_label, year, vision_text });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["current-vision"] });
+      qc.invalidateQueries({ queryKey: ["visions"] });
     },
   });
 }
