@@ -79,6 +79,23 @@ export function useUpdateStat() {
   });
 }
 
+export function useQuests() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["quests", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quests")
+        .select("*, stat_definitions(name, color)")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useQuestCount() {
   const { user } = useAuth();
   return useQuery({
@@ -91,6 +108,39 @@ export function useQuestCount() {
         .eq("user_id", user!.id);
       if (error) throw error;
       return count ?? 0;
+    },
+  });
+}
+
+export function useAddQuest() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (quest: { title: string; category_stat_id?: string | null; impact?: number; reflection?: string | null; quarter?: string | null }) => {
+      const { error } = await supabase.from("quests").insert({
+        ...quest,
+        user_id: user!.id,
+        completed_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quests"] });
+      qc.invalidateQueries({ queryKey: ["quest-count"] });
+    },
+  });
+}
+
+export function useDeleteQuest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("quests").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quests"] });
+      qc.invalidateQueries({ queryKey: ["quest-count"] });
     },
   });
 }

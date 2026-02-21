@@ -1,4 +1,5 @@
-import { LayoutDashboard, ScrollText, Package, Eye, Settings, Sword, LogOut, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LayoutDashboard, ScrollText, Package, Eye, Settings, Sword, LogOut, ChevronRight, Sparkles } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -28,6 +29,16 @@ export function AppSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const collapsed = state === "collapsed";
+  const [expFlash, setExpFlash] = useState(false);
+
+  useEffect(() => {
+    const handler = () => {
+      setExpFlash(true);
+      setTimeout(() => setExpFlash(false), 1700);
+    };
+    window.addEventListener("exp-gained", handler);
+    return () => window.removeEventListener("exp-gained", handler);
+  }, []);
 
   const isActive = (url: string) =>
     url === "/" ? location.pathname === "/" : location.pathname.startsWith(url);
@@ -51,6 +62,12 @@ export function AppSidebar() {
             </div>
           )}
         </div>
+        {expFlash && !collapsed && (
+          <div className="animate-exp-flash flex items-center gap-1.5 mt-2 px-1">
+            <Sparkles className="w-3.5 h-3.5 text-gold" />
+            <span className="text-[11px] font-medium text-gold">EXP Gained!</span>
+          </div>
+        )}
       </SidebarHeader>
 
       {/* Nav */}
