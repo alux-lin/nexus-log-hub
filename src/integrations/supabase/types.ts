@@ -82,6 +82,7 @@ export type Database = {
           created_at: string
           id: string
           quarter_label: string
+          target_date: string | null
           updated_at: string
           user_id: string
           vision_text: string | null
@@ -91,6 +92,7 @@ export type Database = {
           created_at?: string
           id?: string
           quarter_label: string
+          target_date?: string | null
           updated_at?: string
           user_id: string
           vision_text?: string | null
@@ -100,6 +102,7 @@ export type Database = {
           created_at?: string
           id?: string
           quarter_label?: string
+          target_date?: string | null
           updated_at?: string
           user_id?: string
           vision_text?: string | null
