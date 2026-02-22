@@ -1,20 +1,14 @@
-import { useState, useEffect } from "react";
-import { Eye, Plus, Sparkles, BookOpen, Save, X, CalendarIcon } from "lucide-react";
+import { useState, useCallback } from "react";
 import { format, parse } from "date-fns";
+import { Eye, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { useCurrentVision, useAllVisions, useSaveVision } from "@/hooks/usePlayerData";
+import { useCurrentVision, useAllVisions, useSaveVision, useStartQuest } from "@/hooks/usePlayerData";
 import { useToast } from "@/hooks/use-toast";
-
-const QUARTERS = ["Q1", "Q2", "Q3", "Q4"];
+import { RitualStepper } from "@/components/visions/RitualStepper";
+import { PnvSanctuary, type PnvData } from "@/components/visions/PnvSanctuary";
+import { GoalExtraction, type QuestDraft } from "@/components/visions/GoalExtraction";
+import { RitualCommitment } from "@/components/visions/RitualCommitment";
 
 function getDefaultQuarter() {
   const now = new Date();
@@ -29,66 +23,68 @@ function getQuarterEndDate(quarter: string, year: number): Date {
   return parse(`${year}-${endDates[quarter] ?? "12-31"}`, "yyyy-MM-dd", new Date());
 }
 
-const FORTE_GUIDE = [
-  "Write in the present tense as if it's already happened.",
-  "Be specific — include measurable outcomes and feelings.",
-  "Describe what your life looks like, not just goals.",
-  "Include how you feel about your achievements.",
-  "Keep it to one powerful paragraph.",
-];
-
 export default function Visions() {
   const { data: currentVision, isLoading: loadingCurrent } = useCurrentVision();
   const { data: allVisions, isLoading: loadingAll } = useAllVisions();
   const saveVision = useSaveVision();
+  const startQuest = useStartQuest();
   const { toast } = useToast();
-
-  const [open, setOpen] = useState(false);
   const defaults = getDefaultQuarter();
-  const [quarter, setQuarter] = useState(defaults.quarter);
-  const [year, setYear] = useState(defaults.year);
-  const [text, setText] = useState("");
-  const [targetDate, setTargetDate] = useState<Date>(getQuarterEndDate(defaults.quarter, defaults.year));
 
-  // Sync targetDate when quarter/year changes (only reset if user hasn't customized)
-  useEffect(() => {
-    setTargetDate(getQuarterEndDate(quarter, year));
-  }, [quarter, year]);
+  // Wizard state
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [step, setStep] = useState(0);
+  const [pnvData, setPnvData] = useState<PnvData | null>(null);
+  const [questDrafts, setQuestDrafts] = useState<QuestDraft[]>([]);
+  const [isCommitting, setIsCommitting] = useState(false);
 
-  const openNew = () => {
-    const d = getDefaultQuarter();
-    setQuarter(d.quarter);
-    setYear(d.year);
-    setTargetDate(getQuarterEndDate(d.quarter, d.year));
-    setText("");
-    setOpen(true);
+  const openWizard = (initial?: PnvData) => {
+    setPnvData(initial ?? null);
+    setQuestDrafts([]);
+    setStep(0);
+    setWizardOpen(true);
   };
 
   const openEdit = (v: { quarter_label: string; year: number; vision_text: string | null; target_date?: string | null }) => {
-    setQuarter(v.quarter_label);
-    setYear(v.year);
-    setText(v.vision_text ?? "");
-    setTargetDate(v.target_date ? parse(v.target_date, "yyyy-MM-dd", new Date()) : getQuarterEndDate(v.quarter_label, v.year));
-    setOpen(true);
+    openWizard({
+      quarter: v.quarter_label,
+      year: v.year,
+      text: v.vision_text ?? "",
+      targetDate: v.target_date ? parse(v.target_date, "yyyy-MM-dd", new Date()) : getQuarterEndDate(v.quarter_label, v.year),
+    });
   };
 
-  const handleSave = () => {
-    if (!text.trim()) return;
-    saveVision.mutate(
-      {
-        quarter_label: quarter,
-        year,
-        vision_text: text.trim(),
-        target_date: format(targetDate, "yyyy-MM-dd"),
-      },
-      {
-        onSuccess: () => {
-          toast({ title: "Vision Saved", description: `${quarter} ${year} vision recorded.` });
-          setOpen(false);
-        },
+  const handleCommit = useCallback(async () => {
+    if (!pnvData) return;
+    setIsCommitting(true);
+    try {
+      // Save vision
+      await saveVision.mutateAsync({
+        quarter_label: pnvData.quarter,
+        year: pnvData.year,
+        vision_text: pnvData.text,
+        target_date: format(pnvData.targetDate, "yyyy-MM-dd"),
+      });
+
+      // Create quests sequentially
+      for (const q of questDrafts) {
+        await startQuest.mutateAsync({
+          title: q.title,
+          target_completion_date: format(pnvData.targetDate, "yyyy-MM-dd"),
+        });
       }
-    );
-  };
+
+      toast({
+        title: "Quarter Committed ✨",
+        description: `${pnvData.quarter} ${pnvData.year} vision saved with ${questDrafts.length} epic quest${questDrafts.length !== 1 ? "s" : ""}.`,
+      });
+      setWizardOpen(false);
+    } catch {
+      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+    } finally {
+      setIsCommitting(false);
+    }
+  }, [pnvData, questDrafts, saveVision, startQuest, toast]);
 
   const currentDisplayDate = currentVision?.target_date
     ? format(parse(currentVision.target_date, "yyyy-MM-dd", new Date()), "MMMM d, yyyy")
@@ -98,6 +94,44 @@ export default function Visions() {
     (v) => !(v.quarter_label === defaults.quarter && v.year === defaults.year)
   );
 
+  // ── Wizard Mode ──
+  if (wizardOpen) {
+    return (
+      <div className="min-h-screen p-8">
+        <RitualStepper currentStep={step} />
+        {step === 0 && (
+          <PnvSanctuary
+            initial={pnvData ?? undefined}
+            onNext={(data) => {
+              setPnvData(data);
+              setStep(1);
+            }}
+          />
+        )}
+        {step === 1 && (
+          <GoalExtraction
+            initial={questDrafts.length > 0 ? questDrafts : undefined}
+            onNext={(quests) => {
+              setQuestDrafts(quests);
+              setStep(2);
+            }}
+            onBack={() => setStep(0)}
+          />
+        )}
+        {step === 2 && pnvData && (
+          <RitualCommitment
+            pnv={pnvData}
+            quests={questDrafts}
+            onCommit={handleCommit}
+            onBack={() => setStep(1)}
+            isCommitting={isCommitting}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // ── Default Visions List View ──
   return (
     <div className="p-8 max-w-4xl mx-auto">
       {/* Header */}
@@ -111,28 +145,9 @@ export default function Visions() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-gold">
-                <BookOpen className="w-5 h-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-xs space-y-1.5 p-4">
-              <p className="font-semibold text-gold text-xs uppercase tracking-wider mb-2">
-                Tiago Forte's Present Narrative Vision
-              </p>
-              {FORTE_GUIDE.map((tip, i) => (
-                <p key={i} className="text-xs text-muted-foreground">
-                  {i + 1}. {tip}
-                </p>
-              ))}
-            </TooltipContent>
-          </Tooltip>
-          <Button onClick={openNew} size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">
-            <Plus className="w-4 h-4 mr-1" /> New Vision
-          </Button>
-        </div>
+        <Button onClick={() => openWizard()} size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">
+          <Plus className="w-4 h-4 mr-1" /> New Ritual
+        </Button>
       </div>
 
       {/* Current Quarter */}
@@ -161,8 +176,8 @@ export default function Visions() {
               <p className="text-muted-foreground text-sm font-display italic">
                 "It is {currentDisplayDate}, and I have..."
               </p>
-              <Button onClick={openNew} variant="ghost" size="sm" className="mt-4 text-gold">
-                Write your vision
+              <Button onClick={() => openWizard()} variant="ghost" size="sm" className="mt-4 text-gold">
+                Begin your Nexus Ritual
               </Button>
             </CardContent>
           </Card>
@@ -197,108 +212,6 @@ export default function Visions() {
           </div>
         </section>
       )}
-
-      {/* Focus Mode Dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-2xl border-gold/20">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-gold">
-              <Eye className="w-5 h-5" /> Present Narrative Vision
-            </DialogTitle>
-            <DialogDescription>
-              Write in the present tense as if it's already {format(targetDate, "MMMM d, yyyy")}.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex gap-3 mb-2">
-            <div className="flex-1">
-              <Label className="text-xs text-muted-foreground">Quarter</Label>
-              <Select value={quarter} onValueChange={setQuarter}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {QUARTERS.map((q) => (
-                    <SelectItem key={q} value={q}>{q}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-28">
-              <Label className="text-xs text-muted-foreground">Year</Label>
-              <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {[defaults.year - 1, defaults.year, defaults.year + 1].map((y) => (
-                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1">
-              <Label className="text-xs text-muted-foreground">Review Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("w-full mt-1 justify-start text-left font-normal", !targetDate && "text-muted-foreground")}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(targetDate, "MMM d, yyyy")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={targetDate}
-                    onSelect={(d) => d && setTargetDate(d)}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          {/* Prompt */}
-          <div className="bg-secondary/50 rounded-lg p-3 mb-1">
-            <p className="text-xs text-muted-foreground font-display italic">
-              "It is {format(targetDate, "MMMM d, yyyy")}, and I have successfully..."
-            </p>
-          </div>
-
-          <Textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Write your vision here..."
-            className="min-h-[200px] font-display text-base leading-relaxed border-gold/10 focus-visible:ring-gold/30"
-            autoFocus
-          />
-
-          {/* Forte tips inline */}
-          <details className="text-xs text-muted-foreground">
-            <summary className="cursor-pointer hover:text-gold transition-colors">
-              📖 Tiago Forte Style Guide
-            </summary>
-            <ul className="mt-2 space-y-1 pl-4 list-disc">
-              {FORTE_GUIDE.map((tip, i) => (
-                <li key={i}>{tip}</li>
-              ))}
-            </ul>
-          </details>
-
-          <div className="flex justify-end gap-2 mt-2">
-            <Button variant="ghost" onClick={() => setOpen(false)}>
-              <X className="w-4 h-4 mr-1" /> Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!text.trim() || saveVision.isPending}
-              className="bg-gold text-gold-foreground hover:bg-gold/90"
-            >
-              <Save className="w-4 h-4 mr-1" /> {saveVision.isPending ? "Saving..." : "Save Vision"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
