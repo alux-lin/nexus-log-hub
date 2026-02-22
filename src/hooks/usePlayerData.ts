@@ -306,7 +306,7 @@ export function useSaveVision() {
   const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ quarter_label, year, vision_text }: { quarter_label: string; year: number; vision_text: string }) => {
+    mutationFn: async ({ quarter_label, year, vision_text, target_date }: { quarter_label: string; year: number; vision_text: string; target_date?: string }) => {
       // Check if vision exists
       const { data: existing } = await supabase
         .from("quarterly_visions")
@@ -316,16 +316,19 @@ export function useSaveVision() {
         .eq("year", year)
         .maybeSingle();
 
+      const payload: Record<string, unknown> = { vision_text };
+      if (target_date !== undefined) payload.target_date = target_date;
+
       if (existing) {
         const { error } = await supabase
           .from("quarterly_visions")
-          .update({ vision_text })
+          .update(payload)
           .eq("id", existing.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("quarterly_visions")
-          .insert({ user_id: user!.id, quarter_label, year, vision_text });
+          .insert({ user_id: user!.id, quarter_label, year, vision_text, ...(target_date ? { target_date } : {}) });
         if (error) throw error;
       }
     },

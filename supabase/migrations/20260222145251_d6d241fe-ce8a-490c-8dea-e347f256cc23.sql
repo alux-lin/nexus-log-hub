@@ -1,0 +1,1 @@
+ALTER TABLE public.quarterly_visions ADD COLUMN target_date date;

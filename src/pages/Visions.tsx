@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Eye, Plus, Sparkles, BookOpen, Save, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, Plus, Sparkles, BookOpen, Save, X, CalendarIcon } from "lucide-react";
+import { format, parse } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { useCurrentVision, useAllVisions, useSaveVision } from "@/hooks/usePlayerData";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,9 +24,9 @@ function getDefaultQuarter() {
   };
 }
 
-function formatDate(quarter: string, year: number) {
-  const endMonths: Record<string, string> = { Q1: "March 31", Q2: "June 30", Q3: "September 30", Q4: "December 31" };
-  return `${endMonths[quarter] ?? "..."}, ${year}`;
+function getQuarterEndDate(quarter: string, year: number): Date {
+  const endDates: Record<string, string> = { Q1: "03-31", Q2: "06-30", Q3: "09-30", Q4: "12-31" };
+  return parse(`${year}-${endDates[quarter] ?? "12-31"}`, "yyyy-MM-dd", new Date());
 }
 
 const FORTE_GUIDE = [
@@ -44,26 +48,39 @@ export default function Visions() {
   const [quarter, setQuarter] = useState(defaults.quarter);
   const [year, setYear] = useState(defaults.year);
   const [text, setText] = useState("");
+  const [targetDate, setTargetDate] = useState<Date>(getQuarterEndDate(defaults.quarter, defaults.year));
+
+  // Sync targetDate when quarter/year changes (only reset if user hasn't customized)
+  useEffect(() => {
+    setTargetDate(getQuarterEndDate(quarter, year));
+  }, [quarter, year]);
 
   const openNew = () => {
     const d = getDefaultQuarter();
     setQuarter(d.quarter);
     setYear(d.year);
+    setTargetDate(getQuarterEndDate(d.quarter, d.year));
     setText("");
     setOpen(true);
   };
 
-  const openEdit = (v: { quarter_label: string; year: number; vision_text: string | null }) => {
+  const openEdit = (v: { quarter_label: string; year: number; vision_text: string | null; target_date?: string | null }) => {
     setQuarter(v.quarter_label);
     setYear(v.year);
     setText(v.vision_text ?? "");
+    setTargetDate(v.target_date ? parse(v.target_date, "yyyy-MM-dd", new Date()) : getQuarterEndDate(v.quarter_label, v.year));
     setOpen(true);
   };
 
   const handleSave = () => {
     if (!text.trim()) return;
     saveVision.mutate(
-      { quarter_label: quarter, year, vision_text: text.trim() },
+      {
+        quarter_label: quarter,
+        year,
+        vision_text: text.trim(),
+        target_date: format(targetDate, "yyyy-MM-dd"),
+      },
       {
         onSuccess: () => {
           toast({ title: "Vision Saved", description: `${quarter} ${year} vision recorded.` });
@@ -72,6 +89,10 @@ export default function Visions() {
       }
     );
   };
+
+  const currentDisplayDate = currentVision?.target_date
+    ? format(parse(currentVision.target_date, "yyyy-MM-dd", new Date()), "MMMM d, yyyy")
+    : format(getQuarterEndDate(defaults.quarter, defaults.year), "MMMM d, yyyy");
 
   const pastVisions = allVisions?.filter(
     (v) => !(v.quarter_label === defaults.quarter && v.year === defaults.year)
@@ -130,7 +151,7 @@ export default function Visions() {
               <p className="font-display italic text-foreground/90 leading-relaxed whitespace-pre-wrap">
                 "{currentVision.vision_text}"
               </p>
-              <p className="text-xs text-muted-foreground mt-4">Click to edit</p>
+              <p className="text-xs text-muted-foreground mt-4">Target: {currentDisplayDate} · Click to edit</p>
             </CardContent>
           </Card>
         ) : (
@@ -138,7 +159,7 @@ export default function Visions() {
             <CardContent className="p-8 text-center">
               <Sparkles className="w-8 h-8 text-gold/40 mx-auto mb-3" />
               <p className="text-muted-foreground text-sm font-display italic">
-                "It is {formatDate(defaults.quarter, defaults.year)}, and I have..."
+                "It is {currentDisplayDate}, and I have..."
               </p>
               <Button onClick={openNew} variant="ghost" size="sm" className="mt-4 text-gold">
                 Write your vision
@@ -185,7 +206,7 @@ export default function Visions() {
               <Eye className="w-5 h-5" /> Present Narrative Vision
             </DialogTitle>
             <DialogDescription>
-              Write in the present tense as if it's already {formatDate(quarter, year)}.
+              Write in the present tense as if it's already {format(targetDate, "MMMM d, yyyy")}.
             </DialogDescription>
           </DialogHeader>
 
@@ -212,12 +233,35 @@ export default function Visions() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex-1">
+              <Label className="text-xs text-muted-foreground">Review Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn("w-full mt-1 justify-start text-left font-normal", !targetDate && "text-muted-foreground")}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(targetDate, "MMM d, yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={targetDate}
+                    onSelect={(d) => d && setTargetDate(d)}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
           {/* Prompt */}
           <div className="bg-secondary/50 rounded-lg p-3 mb-1">
             <p className="text-xs text-muted-foreground font-display italic">
-              "It is {formatDate(quarter, year)}, and I have successfully..."
+              "It is {format(targetDate, "MMMM d, yyyy")}, and I have successfully..."
             </p>
           </div>
 
