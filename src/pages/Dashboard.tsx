@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useProfile, useStats, useInitDefaultStats, useQuestCount, useInventoryCount, useCurrentVision } from "@/hooks/usePlayerData";
+import { useStatLevels, levelProgress, xpForLevel } from "@/hooks/useStatLevels";
 
 export default function Dashboard() {
   const { data: profile } = useProfile();
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const { data: inventoryCount } = useInventoryCount();
   const { data: currentVision } = useCurrentVision();
   const visionText = currentVision?.vision_text ?? null;
+  const statLevels = useStatLevels();
 
   // Auto-init default stats for new users
   useEffect(() => {
@@ -26,14 +28,15 @@ export default function Dashboard() {
     }
   }, [statsLoading, stats]);
 
-  const radarData = (stats ?? []).map((s) => ({
-    stat: s.name,
-    value: s.current_value,
-    max: s.max_value,
+  const maxLevel = statLevels.length > 0 ? Math.max(...statLevels.map((s) => s.level), 5) : 5;
+
+  const radarData = statLevels.map((s) => ({
+    stat: `${s.name} Lv.${s.level}`,
+    value: s.level,
     fill: s.color ?? "#3B82F6",
   }));
 
-  const totalXP = (stats ?? []).reduce((sum, s) => sum + s.current_value, 0);
+  const totalXP = statLevels.reduce((sum, s) => sum + s.totalXp, 0);
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
@@ -49,7 +52,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {[
           { label: "Active Quests", value: String(questCount ?? 0), sub: "This quarter" },
-          { label: "Total XP", value: String(totalXP), sub: "Accumulated" },
+          { label: "Total XP", value: String(totalXP), sub: "From completed quests" },
           { label: "Inventory", value: String(inventoryCount ?? 0), sub: "Items tracked" },
         ].map((stat) => (
           <div key={stat.label} className="bg-card border border-border rounded-xl p-5">
@@ -83,12 +86,13 @@ export default function Dashboard() {
                 />
                 <PolarRadiusAxis
                   angle={90}
-                  domain={[0, 100]}
+                  domain={[0, maxLevel]}
                   tick={{ fill: "hsl(215 20% 45%)", fontSize: 10 }}
                   axisLine={false}
+                  tickCount={maxLevel + 1}
                 />
                 <Radar
-                  name="Stats"
+                  name="Levels"
                   dataKey="value"
                   stroke="hsl(38 95% 55%)"
                   fill="hsl(38 95% 55%)"
@@ -104,22 +108,22 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Stat bars */}
+        {/* Stat bars – now show level + XP progress */}
         <div className="grid gap-3 mt-4">
-          {(stats ?? []).map((s) => (
+          {statLevels.map((s) => (
             <div key={s.id} className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground w-24 truncate">{s.name}</span>
               <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{
-                    width: `${(s.current_value / s.max_value) * 100}%`,
+                    width: `${s.progress * 100}%`,
                     backgroundColor: s.color ?? "hsl(var(--gold))",
                   }}
                 />
               </div>
-              <span className="text-xs font-mono text-muted-foreground w-12 text-right">
-                {s.current_value}/{s.max_value}
+              <span className="text-xs font-mono text-muted-foreground w-20 text-right">
+                Lv.{s.level} · {s.totalXp}xp
               </span>
             </div>
           ))}
