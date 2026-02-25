@@ -70,6 +70,7 @@ export default function Visions() {
       for (const q of questDrafts) {
         await startQuest.mutateAsync({
           title: q.title,
+          category_stat_id: q.category_stat_id ?? null,
           target_completion_date: format(pnvData.targetDate, "yyyy-MM-dd"),
         });
       }

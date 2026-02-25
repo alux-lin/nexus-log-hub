@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Swords, ChevronRight, ChevronLeft, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useStats } from "@/hooks/usePlayerData";
 
 export interface QuestDraft {
   title: string;
+  category_stat_id?: string | null;
 }
 
 interface GoalExtractionProps {
@@ -14,18 +17,19 @@ interface GoalExtractionProps {
 }
 
 export function GoalExtraction({ onNext, onBack, initial }: GoalExtractionProps) {
+  const { data: stats } = useStats();
   const [quests, setQuests] = useState<QuestDraft[]>(
     initial && initial.length > 0
       ? initial
-      : [{ title: "" }, { title: "" }, { title: "" }]
+      : [{ title: "", category_stat_id: null }, { title: "", category_stat_id: null }, { title: "", category_stat_id: null }]
   );
 
-  const update = (i: number, title: string) => {
-    setQuests((prev) => prev.map((q, idx) => (idx === i ? { title } : q)));
+  const update = (i: number, field: Partial<QuestDraft>) => {
+    setQuests((prev) => prev.map((q, idx) => (idx === i ? { ...q, ...field } : q)));
   };
 
   const addQuest = () => {
-    if (quests.length < 5) setQuests((prev) => [...prev, { title: "" }]);
+    if (quests.length < 5) setQuests((prev) => [...prev, { title: "", category_stat_id: null }]);
   };
 
   const removeQuest = (i: number) => {
@@ -50,11 +54,26 @@ export function GoalExtraction({ onNext, onBack, initial }: GoalExtractionProps)
             <span className="text-xs text-muted-foreground font-mono w-6 text-right">{i + 1}.</span>
             <Input
               value={q.title}
-              onChange={(e) => update(i, e.target.value)}
+              onChange={(e) => update(i, { title: e.target.value })}
               placeholder={`Quest ${i + 1} — e.g. "Ship the MVP by March"`}
               className="flex-1 border-gold/10 focus-visible:ring-gold/30"
               autoFocus={i === 0}
             />
+            <Select value={q.category_stat_id ?? ""} onValueChange={(v) => update(i, { category_stat_id: v || null })}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Stat…" />
+              </SelectTrigger>
+              <SelectContent>
+                {stats?.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full" style={{ background: s.color ?? undefined }} />
+                      {s.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {quests.length > 1 && (
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => removeQuest(i)}>
                 <X className="w-4 h-4" />
