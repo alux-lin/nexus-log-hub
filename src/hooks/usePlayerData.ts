@@ -44,6 +44,7 @@ export function useStats() {
         .from("stat_definitions")
         .select("*")
         .eq("user_id", user!.id)
+        .order("sort_order")
         .order("created_at");
       if (error) throw error;
       return data;

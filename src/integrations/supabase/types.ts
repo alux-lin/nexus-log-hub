@@ -165,6 +165,7 @@ export type Database = {
       }
       stat_definitions: {
         Row: {
+          archetype_name: string | null
           color: string | null
           created_at: string
           current_value: number
@@ -172,10 +173,12 @@ export type Database = {
           id: string
           max_value: number
           name: string
+          sort_order: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          archetype_name?: string | null
           color?: string | null
           created_at?: string
           current_value?: number
@@ -183,10 +186,12 @@ export type Database = {
           id?: string
           max_value?: number
           name: string
+          sort_order?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          archetype_name?: string | null
           color?: string | null
           created_at?: string
           current_value?: number
@@ -194,6 +199,7 @@ export type Database = {
           id?: string
           max_value?: number
           name?: string
+          sort_order?: number
           updated_at?: string
           user_id?: string
         }

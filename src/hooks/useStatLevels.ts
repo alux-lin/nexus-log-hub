@@ -1,6 +1,5 @@
-import { useMemo, useRef, useEffect } from "react";
-import { useCompletedQuests, useStats, useUpdateStat, useUpdateProfile } from "./usePlayerData";
-import { useToast } from "./use-toast";
+import { useMemo } from "react";
+import { useCompletedQuests, useStats } from "./usePlayerData";
 
 // Exponential XP curve: XP needed for level N = base * (ratio ^ (N-1))
 const BASE_XP = 5;
@@ -39,16 +38,11 @@ export function levelProgress(xp: number): number {
   return (xp - currentLevelXp) / (nextLevelXp - currentLevelXp);
 }
 
-const ARCHETYPE_MAP: Record<string, string> = {
-  Strength: "The Guardian",
-  Intellect: "The Architect",
-  Spirit: "The Sage",
-};
-
 export interface StatLevel {
   id: string;
   name: string;
   color: string | null;
+  archetypeName: string | null;
   totalXp: number;
   level: number;
   progress: number;
@@ -57,15 +51,11 @@ export interface StatLevel {
 
 /**
  * Calculates stat levels from completed quest impacts.
- * Also syncs current_value on stat_definitions and auto-updates archetype.
+ * Pure computation — no side effects.
  */
 export function useStatLevels() {
   const { data: stats } = useStats();
   const { data: completedQuests } = useCompletedQuests();
-  const updateStat = useUpdateStat();
-  const updateProfile = useUpdateProfile();
-  const { toast } = useToast();
-  const prevLevelsRef = useRef<Record<string, number>>({});
 
   const statLevels = useMemo<StatLevel[]>(() => {
     if (!stats || !completedQuests) return [];
@@ -89,6 +79,7 @@ export function useStatLevels() {
         id: s.id,
         name: s.name,
         color: s.color,
+        archetypeName: (s as Record<string, unknown>).archetype_name as string | null,
         totalXp,
         level,
         progress,
@@ -97,40 +88,13 @@ export function useStatLevels() {
     });
   }, [stats, completedQuests]);
 
-  // Detect level-ups and sync
-  useEffect(() => {
-    if (statLevels.length === 0) return;
-
-    const prev = prevLevelsRef.current;
-    const hasPrev = Object.keys(prev).length > 0;
-
-    for (const sl of statLevels) {
-      // Show level-up toast
-      if (hasPrev && prev[sl.id] !== undefined && sl.level > prev[sl.id]) {
-        toast({
-          title: `⬆️ Level Up! ${sl.name} → Lv.${sl.level}`,
-          description: `Your ${sl.name} stat reached level ${sl.level}!`,
-        });
-      }
-
-      // Sync current_value to stat_definitions
-      updateStat.mutate({ id: sl.id, current_value: sl.totalXp });
-    }
-
-    // Update prev levels
-    const newPrev: Record<string, number> = {};
-    for (const sl of statLevels) newPrev[sl.id] = sl.level;
-    prevLevelsRef.current = newPrev;
-
-    // Auto-set archetype based on dominant stat
-    if (statLevels.length > 0) {
-      const dominant = statLevels.reduce((a, b) => (b.totalXp > a.totalXp ? b : a));
-      if (dominant.totalXp > 0) {
-        const archetype = ARCHETYPE_MAP[dominant.name] ?? `The ${dominant.name} Master`;
-        updateProfile.mutate({ archetype_class: archetype });
-      }
-    }
-  }, [statLevels]); // eslint-disable-line react-hooks/exhaustive-deps
-
   return statLevels;
+}
+
+/** Get the dominant stat's archetype name */
+export function getDominantArchetype(statLevels: StatLevel[]): string | null {
+  if (statLevels.length === 0) return null;
+  const dominant = statLevels.reduce((a, b) => (b.totalXp > a.totalXp ? b : a));
+  if (dominant.totalXp === 0) return null;
+  return dominant.archetypeName ?? `The ${dominant.name} Master`;
 }
