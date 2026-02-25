@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { LayoutDashboard, Shield } from "lucide-react";
 import {
   Radar,
@@ -8,8 +8,9 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer,
 } from "recharts";
-import { useProfile, useStats, useInitDefaultStats, useQuestCount, useInventoryCount, useCurrentVision } from "@/hooks/usePlayerData";
-import { useStatLevels, levelProgress, xpForLevel } from "@/hooks/useStatLevels";
+import { useProfile, useStats, useInitDefaultStats, useQuestCount, useInventoryCount, useCurrentVision, useUpdateProfile, useUpdateStat } from "@/hooks/usePlayerData";
+import { useStatLevels, getDominantArchetype } from "@/hooks/useStatLevels";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const { data: profile } = useProfile();
@@ -18,15 +19,57 @@ export default function Dashboard() {
   const { data: questCount } = useQuestCount();
   const { data: inventoryCount } = useInventoryCount();
   const { data: currentVision } = useCurrentVision();
+  const updateProfile = useUpdateProfile();
+  const updateStat = useUpdateStat();
+  const { toast } = useToast();
   const visionText = currentVision?.vision_text ?? null;
   const statLevels = useStatLevels();
+
+  const prevLevelsRef = useRef<Record<string, number>>({});
+  const hasSyncedRef = useRef(false);
 
   // Auto-init default stats for new users
   useEffect(() => {
     if (!statsLoading && stats && stats.length === 0) {
       initStats.mutate();
     }
-  }, [statsLoading, stats]);
+  }, [statsLoading, stats]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Detect level-ups, sync stat values & archetype (only when statLevels actually change)
+  useEffect(() => {
+    if (statLevels.length === 0) return;
+
+    const prev = prevLevelsRef.current;
+    const hasPrev = Object.keys(prev).length > 0;
+
+    // Build a stable key to avoid re-running on same data
+    const key = statLevels.map((s) => `${s.id}:${s.totalXp}`).join(",");
+    if (hasSyncedRef.current && key === (hasSyncedRef as unknown as { key?: string }).key) return;
+    (hasSyncedRef as unknown as { key?: string }).key = key;
+
+    for (const sl of statLevels) {
+      if (hasPrev && prev[sl.id] !== undefined && sl.level > prev[sl.id]) {
+        toast({
+          title: `⬆️ Level Up! ${sl.name} → Lv.${sl.level}`,
+          description: `Your ${sl.name} stat reached level ${sl.level}!`,
+        });
+      }
+      // Sync current_value
+      updateStat.mutate({ id: sl.id, current_value: sl.totalXp });
+    }
+
+    // Update prev levels
+    const newPrev: Record<string, number> = {};
+    for (const sl of statLevels) newPrev[sl.id] = sl.level;
+    prevLevelsRef.current = newPrev;
+    hasSyncedRef.current = true;
+
+    // Auto-set archetype from dominant stat
+    const archetype = getDominantArchetype(statLevels);
+    if (archetype && archetype !== profile?.archetype_class) {
+      updateProfile.mutate({ archetype_class: archetype });
+    }
+  }, [statLevels]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const maxLevel = statLevels.length > 0 ? Math.max(...statLevels.map((s) => s.level), 5) : 5;
 
@@ -108,7 +151,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Stat bars – now show level + XP progress */}
+        {/* Stat bars */}
         <div className="grid gap-3 mt-4">
           {statLevels.map((s) => (
             <div key={s.id} className="flex items-center gap-3">
