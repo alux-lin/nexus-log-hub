@@ -56,6 +56,9 @@ export type Database = {
           id: string
           updated_at: string
           user_id: string
+          xp_base: number
+          xp_max_level: number
+          xp_ratio: number
         }
         Insert: {
           archetype_class?: string | null
@@ -65,6 +68,9 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id: string
+          xp_base?: number
+          xp_max_level?: number
+          xp_ratio?: number
         }
         Update: {
           archetype_class?: string | null
@@ -74,6 +80,9 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+          xp_base?: number
+          xp_max_level?: number
+          xp_ratio?: number
         }
         Relationships: []
       }
