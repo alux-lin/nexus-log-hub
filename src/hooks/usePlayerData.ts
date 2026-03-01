@@ -157,7 +157,7 @@ export function useStartQuest() {
 export function useCompleteQuest() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, impact, reflection }: { id: string; impact: number; reflection: string | null }) => {
+    mutationFn: async ({ id, impact, reflection, statRewards }: { id: string; impact: number; reflection: string | null; statRewards?: { stat_id: string; xp_amount: number }[] }) => {
       const { error } = await supabase.from("quests").update({
         status: "completed",
         impact,
@@ -165,10 +165,35 @@ export function useCompleteQuest() {
         completed_at: new Date().toISOString(),
       }).eq("id", id);
       if (error) throw error;
+
+      // Insert stat XP rewards
+      if (statRewards && statRewards.length > 0) {
+        const { error: rewardError } = await supabase.from("quest_stat_rewards").insert(
+          statRewards.map((r) => ({ quest_id: id, stat_id: r.stat_id, xp_amount: r.xp_amount }))
+        );
+        if (rewardError) throw rewardError;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["quests"] });
       qc.invalidateQueries({ queryKey: ["quest-count"] });
+      qc.invalidateQueries({ queryKey: ["quest-rewards"] });
+    },
+  });
+}
+
+export function useQuestRewards() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["quest-rewards", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quest_stat_rewards")
+        .select("*, quests!inner(user_id, status)")
+        .eq("quests.user_id", user!.id);
+      if (error) throw error;
+      return data;
     },
   });
 }

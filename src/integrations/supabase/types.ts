@@ -119,6 +119,45 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_stat_rewards: {
+        Row: {
+          created_at: string
+          id: string
+          quest_id: string
+          stat_id: string
+          xp_amount: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          quest_id: string
+          stat_id: string
+          xp_amount?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          quest_id?: string
+          stat_id?: string
+          xp_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_stat_rewards_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_stat_rewards_stat_id_fkey"
+            columns: ["stat_id"]
+            isOneToOne: false
+            referencedRelation: "stat_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quests: {
         Row: {
           category_stat_id: string | null

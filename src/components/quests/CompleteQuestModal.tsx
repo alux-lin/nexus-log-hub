@@ -1,31 +1,69 @@
-import { useState } from "react";
-import { Star, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Star, Sparkles, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useStats } from "@/hooks/usePlayerData";
 
 const impactLevels = [1, 2, 3, 4, 5] as const;
+
+interface StatReward {
+  stat_id: string;
+  xp_amount: number;
+}
 
 interface CompleteQuestModalProps {
   quest: { id: string; title: string } | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onComplete: (data: { id: string; impact: number; reflection: string | null }) => void;
+  onComplete: (data: { id: string; impact: number; reflection: string | null; statRewards: StatReward[] }) => void;
   isPending?: boolean;
 }
 
 export default function CompleteQuestModal({ quest, open, onOpenChange, onComplete, isPending }: CompleteQuestModalProps) {
+  const { data: stats } = useStats();
   const [impact, setImpact] = useState(3);
   const [reflection, setReflection] = useState("");
+  const [statRewards, setStatRewards] = useState<StatReward[]>([]);
+
+  // Reset when quest changes
+  useEffect(() => {
+    if (open) {
+      setImpact(3);
+      setReflection("");
+      setStatRewards([]);
+    }
+  }, [open]);
+
+  const addReward = () => {
+    const usedIds = new Set(statRewards.map((r) => r.stat_id));
+    const available = stats?.find((s) => !usedIds.has(s.id));
+    if (available) {
+      setStatRewards((prev) => [...prev, { stat_id: available.id, xp_amount: 5 }]);
+    }
+  };
+
+  const removeReward = (index: number) => {
+    setStatRewards((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateReward = (index: number, field: keyof StatReward, value: string | number) => {
+    setStatRewards((prev) =>
+      prev.map((r, i) => (i === index ? { ...r, [field]: value } : r))
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!quest) return;
-    onComplete({ id: quest.id, impact, reflection: reflection.trim() || null });
-    setImpact(3);
-    setReflection("");
+    onComplete({ id: quest.id, impact, reflection: reflection.trim() || null, statRewards });
   };
+
+  const usedStatIds = new Set(statRewards.map((r) => r.stat_id));
+  const canAddMore = stats && stats.length > usedStatIds.size;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -57,6 +95,50 @@ export default function CompleteQuestModal({ quest, open, onOpenChange, onComple
             </div>
           </div>
 
+          {/* Stat XP Rewards */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>XP Rewards</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addReward} disabled={!canAddMore} className="gap-1 h-7 text-xs">
+                <Plus className="w-3 h-3" /> Add Stat
+              </Button>
+            </div>
+            {statRewards.length === 0 && (
+              <p className="text-xs text-muted-foreground">No XP rewards assigned. Add stats to grant XP.</p>
+            )}
+            {statRewards.map((reward, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Select value={reward.stat_id} onValueChange={(v) => updateReward(i, "stat_id", v)}>
+                  <SelectTrigger className="flex-1 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stats?.filter((s) => s.id === reward.stat_id || !usedStatIds.has(s.id)).map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full" style={{ background: s.color ?? undefined }} />
+                          {s.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="number"
+                  min={1}
+                  max={999}
+                  value={reward.xp_amount}
+                  onChange={(e) => updateReward(i, "xp_amount", Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20 h-9 text-center"
+                />
+                <span className="text-xs text-muted-foreground">XP</span>
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeReward(i)}>
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ))}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="reflection">Reflection (Markdown)</Label>
             <Textarea
@@ -64,7 +146,7 @@ export default function CompleteQuestModal({ quest, open, onOpenChange, onComple
               placeholder="What did you learn? How did this change you?"
               value={reflection}
               onChange={(e) => setReflection(e.target.value)}
-              rows={5}
+              rows={4}
               className="font-mono text-xs resize-none"
             />
           </div>

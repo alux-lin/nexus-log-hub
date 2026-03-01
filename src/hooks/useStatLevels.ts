@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useCompletedQuests, useStats, useProfile } from "./usePlayerData";
+import { useStats, useProfile, useQuestRewards } from "./usePlayerData";
 
 /** Total cumulative XP needed to reach a given level */
 export function xpForLevel(level: number, base: number, ratio: number): number {
@@ -45,27 +45,34 @@ export interface StatLevel {
 }
 
 /**
- * Calculates stat levels from completed quest impacts.
+ * Calculates stat levels from quest_stat_rewards XP.
  * Uses the user's custom XP curve parameters from their profile.
  */
 export function useStatLevels() {
   const { data: profile } = useProfile();
   const { data: stats } = useStats();
-  const { data: completedQuests } = useCompletedQuests();
+  const { data: rewards } = useQuestRewards();
 
   const base = (profile as Record<string, unknown>)?.xp_base as number ?? 5;
   const ratio = Number((profile as Record<string, unknown>)?.xp_ratio ?? 1.5);
   const maxLevel = (profile as Record<string, unknown>)?.xp_max_level as number ?? 20;
 
   const statLevels = useMemo<StatLevel[]>(() => {
-    if (!stats || !completedQuests) return [];
+    if (!stats) return [];
 
     const xpByStat: Record<string, number> = {};
     for (const s of stats) xpByStat[s.id] = 0;
 
-    for (const q of completedQuests) {
-      if (q.category_stat_id && xpByStat[q.category_stat_id] !== undefined) {
-        xpByStat[q.category_stat_id] += q.impact;
+    // Sum XP from quest_stat_rewards (only completed quests due to inner join)
+    if (rewards) {
+      for (const r of rewards) {
+        const reward = r as Record<string, unknown>;
+        const statId = reward.stat_id as string;
+        const xp = reward.xp_amount as number;
+        const quest = reward.quests as Record<string, unknown>;
+        if (quest?.status === "completed" && xpByStat[statId] !== undefined) {
+          xpByStat[statId] += xp;
+        }
       }
     }
 
@@ -85,7 +92,7 @@ export function useStatLevels() {
         xpToNext: nextXp - totalXp,
       };
     });
-  }, [stats, completedQuests, base, ratio, maxLevel]);
+  }, [stats, rewards, base, ratio, maxLevel]);
 
   return statLevels;
 }
