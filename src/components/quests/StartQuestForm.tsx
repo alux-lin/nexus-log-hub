@@ -7,8 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { useStats } from "@/hooks/usePlayerData";
+import { useStats, useProfile } from "@/hooks/usePlayerData";
 import { cn } from "@/lib/utils";
+
+function getXpPresets(base: number) {
+  return { Low: base, Medium: base * 2, High: base * 4 };
+}
 
 interface StatReward {
   stat_id: string;
@@ -23,6 +27,8 @@ interface StartQuestFormProps {
 
 export default function StartQuestForm({ onSubmit, onCancel, isPending }: StartQuestFormProps) {
   const { data: stats } = useStats();
+  const { data: profile } = useProfile();
+  const xpPresets = getXpPresets(profile?.xp_base ?? 5);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState<Date>();
   const [statRewards, setStatRewards] = useState<StatReward[]>([]);
@@ -94,6 +100,18 @@ export default function StartQuestForm({ onSubmit, onCancel, isPending }: StartQ
                 ))}
               </SelectContent>
             </Select>
+            <div className="flex items-center gap-1">
+              {Object.entries(xpPresets).map(([label, val]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => updateReward(i, "xp_amount", val)}
+                  className={cn("px-1.5 py-0.5 text-[10px] rounded border transition-colors", reward.xp_amount === val ? "bg-gold/20 text-gold border-gold/40" : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80")}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <Input
               type="number"
               min={1}
