@@ -34,7 +34,7 @@ export default function QuestLog() {
   );
 
   const handleComplete = useCallback(
-    (data: { id: string; impact: number; reflection: string | null }) => {
+    (data: { id: string; impact: number; reflection: string | null; statRewards: { stat_id: string; xp_amount: number }[] }) => {
       if (completeQuest.isPending) return;
       completeQuest.mutate(data, {
         onSuccess: () => {
