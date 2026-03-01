@@ -6,7 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useStats } from "@/hooks/usePlayerData";
+import { useStats, useProfile } from "@/hooks/usePlayerData";
+import { cn } from "@/lib/utils";
+
+function getXpPresets(base: number) {
+  return { Low: base, Medium: base * 2, High: base * 4 };
+}
 
 const impactLevels = [1, 2, 3, 4, 5] as const;
 
@@ -25,6 +30,8 @@ interface CompleteQuestModalProps {
 
 export default function CompleteQuestModal({ quest, open, onOpenChange, onComplete, isPending }: CompleteQuestModalProps) {
   const { data: stats } = useStats();
+  const { data: profile } = useProfile();
+  const xpPresets = getXpPresets(profile?.xp_base ?? 5);
   const [impact, setImpact] = useState(3);
   const [reflection, setReflection] = useState("");
   const [statRewards, setStatRewards] = useState<StatReward[]>([]);
@@ -123,6 +130,18 @@ export default function CompleteQuestModal({ quest, open, onOpenChange, onComple
                     ))}
                   </SelectContent>
                 </Select>
+                <div className="flex items-center gap-1">
+                  {Object.entries(xpPresets).map(([label, val]) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => updateReward(i, "xp_amount", val)}
+                      className={cn("px-1.5 py-0.5 text-[10px] rounded border transition-colors", reward.xp_amount === val ? "bg-gold/20 text-gold border-gold/40" : "bg-secondary text-muted-foreground border-border hover:bg-secondary/80")}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 <Input
                   type="number"
                   min={1}
