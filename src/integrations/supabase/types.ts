@@ -86,6 +86,39 @@ export type Database = {
         }
         Relationships: []
       }
+      quarterly_reviews: {
+        Row: {
+          archived_at: string
+          created_at: string
+          id: string
+          manifesto_data: Json
+          quarter_label: string
+          user_id: string
+          vision_text: string | null
+          year: number
+        }
+        Insert: {
+          archived_at?: string
+          created_at?: string
+          id?: string
+          manifesto_data?: Json
+          quarter_label: string
+          user_id: string
+          vision_text?: string | null
+          year: number
+        }
+        Update: {
+          archived_at?: string
+          created_at?: string
+          id?: string
+          manifesto_data?: Json
+          quarter_label?: string
+          user_id?: string
+          vision_text?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
       quarterly_visions: {
         Row: {
           created_at: string
