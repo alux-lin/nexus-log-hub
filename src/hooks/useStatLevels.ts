@@ -55,7 +55,7 @@ export function useStatLevels() {
 
   const base = (profile as Record<string, unknown>)?.xp_base as number ?? 5;
   const ratio = Number((profile as Record<string, unknown>)?.xp_ratio ?? 1.5);
-  const maxLevel = (profile as Record<string, unknown>)?.xp_max_level as number ?? 20;
+  const maxLevel = (profile as Record<string, unknown>)?.xp_max_level as number ?? 100;
 
   const statLevels = useMemo<StatLevel[]>(() => {
     if (!stats) return [];

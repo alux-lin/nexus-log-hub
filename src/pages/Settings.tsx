@@ -35,7 +35,7 @@ export default function Settings() {
   const [statEdits, setStatEdits] = useState<StatEdit[]>([]);
   const [xpBase, setXpBase] = useState(5);
   const [xpRatio, setXpRatio] = useState(1.5);
-  const [xpMaxLevel, setXpMaxLevel] = useState(20);
+  const [xpMaxLevel, setXpMaxLevel] = useState(100);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
