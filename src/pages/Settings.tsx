@@ -244,7 +244,7 @@ export default function Settings() {
               value={[xpMaxLevel]}
               onValueChange={([v]) => setXpMaxLevel(v)}
               min={5}
-              max={50}
+              max={100}
               step={1}
             />
           </div>
