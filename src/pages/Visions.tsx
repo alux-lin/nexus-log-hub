@@ -1,14 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { format, parse } from "date-fns";
-import { Eye, Plus, Sparkles } from "lucide-react";
+import { Eye, Plus, Sparkles, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentVision, useAllVisions, useSaveVision, useStartQuest } from "@/hooks/usePlayerData";
+import { useUnreviewedQuarter, useArchivedReviews } from "@/hooks/useQuarterlyReview";
 import { useToast } from "@/hooks/use-toast";
 import { RitualStepper } from "@/components/visions/RitualStepper";
 import { PnvSanctuary, type PnvData } from "@/components/visions/PnvSanctuary";
 import { GoalExtraction, type QuestDraft } from "@/components/visions/GoalExtraction";
 import { RitualCommitment } from "@/components/visions/RitualCommitment";
+import { QuarterlyReviewModal } from "@/components/review/QuarterlyReviewModal";
 
 function getDefaultQuarter() {
   const now = new Date();
@@ -26,6 +28,8 @@ function getQuarterEndDate(quarter: string, year: number): Date {
 export default function Visions() {
   const { data: currentVision, isLoading: loadingCurrent } = useCurrentVision();
   const { data: allVisions, isLoading: loadingAll } = useAllVisions();
+  const { data: unreviewedQuarter } = useUnreviewedQuarter();
+  const { data: archivedReviews } = useArchivedReviews();
   const saveVision = useSaveVision();
   const startQuest = useStartQuest();
   const { toast } = useToast();
@@ -37,6 +41,20 @@ export default function Visions() {
   const [pnvData, setPnvData] = useState<PnvData | null>(null);
   const [questDrafts, setQuestDrafts] = useState<QuestDraft[]>([]);
   const [isCommitting, setIsCommitting] = useState(false);
+
+  // Review state
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewQuarter, setReviewQuarter] = useState<{ q: string; y: number } | null>(null);
+  const [autoPrompted, setAutoPrompted] = useState(false);
+
+  // Auto-prompt for unreviewed quarter
+  useEffect(() => {
+    if (unreviewedQuarter && !autoPrompted && !wizardOpen && !reviewOpen) {
+      setReviewQuarter({ q: unreviewedQuarter.quarter, y: unreviewedQuarter.year });
+      setReviewOpen(true);
+      setAutoPrompted(true);
+    }
+  }, [unreviewedQuarter, autoPrompted, wizardOpen, reviewOpen]);
 
   const openWizard = (initial?: PnvData) => {
     setPnvData(initial ?? null);
@@ -94,6 +112,20 @@ export default function Visions() {
   const pastVisions = allVisions?.filter(
     (v) => !(v.quarter_label === defaults.quarter && v.year === defaults.year)
   );
+
+  // ── Review Mode ──
+  if (reviewOpen && reviewQuarter) {
+    return (
+      <QuarterlyReviewModal
+        quarterLabel={reviewQuarter.q}
+        year={reviewQuarter.y}
+        onClose={() => {
+          setReviewOpen(false);
+          setReviewQuarter(null);
+        }}
+      />
+    );
+  }
 
   // ── Wizard Mode ──
   if (wizardOpen) {
@@ -185,9 +217,28 @@ export default function Visions() {
         )}
       </section>
 
+      {/* Unreviewed Quarter Banner */}
+      {unreviewedQuarter && (
+        <section className="mb-10">
+          <Card className="border-gold/30 bg-gold/5 cursor-pointer hover:border-gold/50 transition-colors" onClick={() => {
+            setReviewQuarter({ q: unreviewedQuarter.quarter, y: unreviewedQuarter.year });
+            setReviewOpen(true);
+          }}>
+            <CardContent className="p-5 flex items-center gap-3">
+              <ScrollText className="w-5 h-5 text-gold shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">Review {unreviewedQuarter.quarter} {unreviewedQuarter.year}</p>
+                <p className="text-xs text-muted-foreground">Your previous quarter awaits its chronicle</p>
+              </div>
+              <Button size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">Review</Button>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
       {/* Past Visions */}
       {!loadingAll && pastVisions && pastVisions.length > 0 && (
-        <section>
+        <section className="mb-10">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
             Past Visions
           </h2>
@@ -210,6 +261,41 @@ export default function Visions() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Archived Reviews */}
+      {archivedReviews && archivedReviews.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+            Archived Chronicles
+          </h2>
+          <div className="space-y-3">
+            {archivedReviews.map((r: any) => {
+              const m = r.manifesto_data as any;
+              return (
+                <Card
+                  key={r.id}
+                  className="border-border cursor-pointer hover:border-muted-foreground/30 transition-colors"
+                  onClick={() => {
+                    setReviewQuarter({ q: r.quarter_label, y: r.year });
+                    setReviewOpen(true);
+                  }}
+                >
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <ScrollText className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{r.quarter_label} {r.year} Manifesto</p>
+                      <p className="text-xs text-muted-foreground">
+                        {m?.questsCompleted ?? 0} quests · {m?.totalXpGained ?? 0} XP
+                        {m?.dominantArchetype ? ` · ${m.dominantArchetype}` : ""}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </section>
       )}
