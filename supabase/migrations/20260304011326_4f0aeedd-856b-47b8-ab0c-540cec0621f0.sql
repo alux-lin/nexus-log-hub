@@ -1,0 +1,1 @@
+ALTER TABLE profiles ALTER COLUMN xp_max_level SET DEFAULT 100;
