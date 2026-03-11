@@ -96,12 +96,12 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
       <div className="min-h-screen p-8 flex items-center justify-center">
         <div className="text-center max-w-md">
           <Sparkles className="w-12 h-12 text-gold mx-auto mb-4" />
-          <h2 className="text-2xl font-display font-bold text-foreground mb-2">Quarter Sealed</h2>
+          <h2 className="text-2xl font-display font-bold text-foreground mb-2">Quarter Archived</h2>
           <p className="text-muted-foreground text-sm mb-6">
-            {quarterLabel} {year} has been archived. Your chronicle grows stronger.
+            {quarterLabel} {year} has been archived successfully.
           </p>
           <Button onClick={onClose} className="bg-gold text-gold-foreground hover:bg-gold/90">
-            Begin Next Ritual
+            Continue
           </Button>
         </div>
       </div>
