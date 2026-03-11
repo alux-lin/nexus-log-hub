@@ -74,7 +74,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
       });
 
       setStep("done");
-      toast({ title: "Quarter Archived ✨", description: `${quarterLabel} ${year} has been sealed into your chronicle.` });
+      toast({ title: "Quarter Archived", description: `${quarterLabel} ${year} has been archived.` });
     } catch {
       toast({ title: "Error", description: "Failed to archive quarter.", variant: "destructive" });
     } finally {
@@ -85,7 +85,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
   if (isLoading || !data) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
-        <p className="text-muted-foreground text-sm animate-pulse">Gathering your chronicle...</p>
+        <p className="text-muted-foreground text-sm animate-pulse">Loading review...</p>
       </div>
     );
   }
@@ -96,12 +96,12 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
       <div className="min-h-screen p-8 flex items-center justify-center">
         <div className="text-center max-w-md">
           <Sparkles className="w-12 h-12 text-gold mx-auto mb-4" />
-          <h2 className="text-2xl font-display font-bold text-foreground mb-2">Quarter Sealed</h2>
+          <h2 className="text-2xl font-display font-bold text-foreground mb-2">Quarter Archived</h2>
           <p className="text-muted-foreground text-sm mb-6">
-            {quarterLabel} {year} has been archived. Your chronicle grows stronger.
+            {quarterLabel} {year} has been archived successfully.
           </p>
           <Button onClick={onClose} className="bg-gold text-gold-foreground hover:bg-gold/90">
-            Begin Next Ritual
+            Continue
           </Button>
         </div>
       </div>
@@ -165,7 +165,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
             className="bg-gold text-gold-foreground hover:bg-gold/90 flex-1"
           >
             <Archive className="w-4 h-4 mr-1" />
-            {isArchiving ? "Archiving..." : "Seal This Quarter"}
+            {isArchiving ? "Archiving..." : "Archive Quarter"}
           </Button>
         </div>
       </div>
@@ -184,7 +184,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
         <h1 className="text-3xl font-display font-bold text-foreground">
           {quarterLabel} {year} Manifesto
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Your quarterly chronicle</p>
+        <p className="text-sm text-muted-foreground mt-1">Quarterly review summary</p>
       </div>
 
       {/* Vision */}
@@ -283,7 +283,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
           className="bg-gold text-gold-foreground hover:bg-gold/90 flex-1"
         >
           <Archive className="w-4 h-4 mr-1" />
-          {data.activeQuests.length > 0 ? "Review Unfinished Quests" : isArchiving ? "Archiving..." : "Seal This Quarter"}
+          {data.activeQuests.length > 0 ? "Review Unfinished Quests" : isArchiving ? "Archiving..." : "Archive Quarter"}
         </Button>
       </div>
     </div>

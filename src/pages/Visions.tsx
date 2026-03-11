@@ -94,8 +94,8 @@ export default function Visions() {
       }
 
       toast({
-        title: "Quarter Committed ✨",
-        description: `${pnvData.quarter} ${pnvData.year} vision saved with ${questDrafts.length} epic quest${questDrafts.length !== 1 ? "s" : ""}.`,
+        title: "Quarter Committed",
+        description: `${pnvData.quarter} ${pnvData.year} vision saved with ${questDrafts.length} quest${questDrafts.length !== 1 ? "s" : ""}.`,
       });
       setWizardOpen(false);
     } catch {
@@ -179,7 +179,7 @@ export default function Visions() {
           </div>
         </div>
         <Button onClick={() => openWizard()} size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">
-          <Plus className="w-4 h-4 mr-1" /> New Ritual
+          <Plus className="w-4 h-4 mr-1" /> New Quarter
         </Button>
       </div>
 
@@ -210,7 +210,7 @@ export default function Visions() {
                 "It is {currentDisplayDate}, and I have..."
               </p>
               <Button onClick={() => openWizard()} variant="ghost" size="sm" className="mt-4 text-gold">
-                Begin your Nexus Ritual
+                Start New Quarter
               </Button>
             </CardContent>
           </Card>
@@ -228,7 +228,7 @@ export default function Visions() {
               <ScrollText className="w-5 h-5 text-gold shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">Review {unreviewedQuarter.quarter} {unreviewedQuarter.year}</p>
-                <p className="text-xs text-muted-foreground">Your previous quarter awaits its chronicle</p>
+                <p className="text-xs text-muted-foreground">Your previous quarter is ready for review</p>
               </div>
               <Button size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">Review</Button>
             </CardContent>
@@ -269,7 +269,7 @@ export default function Visions() {
       {archivedReviews && archivedReviews.length > 0 && (
         <section>
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
-            Archived Chronicles
+            Past Reviews
           </h2>
           <div className="space-y-3">
             {archivedReviews.map((r: any) => {

@@ -2,8 +2,8 @@ import { cn } from "@/lib/utils";
 import { Eye, Swords, Shield } from "lucide-react";
 
 const STEPS = [
-  { label: "PNV Sanctuary", icon: Eye },
-  { label: "Extract Quests", icon: Swords },
+  { label: "Vision", icon: Eye },
+  { label: "Quests", icon: Swords },
   { label: "Commit", icon: Shield },
 ];
 

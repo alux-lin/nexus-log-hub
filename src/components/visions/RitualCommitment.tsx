@@ -17,10 +17,10 @@ export function RitualCommitment({ pnv, quests, onCommit, onBack, isCommitting }
     <div className="flex flex-col items-center justify-center min-h-[70vh] max-w-2xl mx-auto px-4">
       <Shield className="w-10 h-10 text-gold mb-4" />
       <h2 className="font-display text-3xl text-gold mb-2 text-center">
-        Ritual Commitment
+        Review & Commit
       </h2>
       <p className="text-muted-foreground text-sm text-center mb-8">
-        Review your vision and quests for {pnv.quarter} {pnv.year}. When ready, commit to the quarter.
+        Confirm your vision and quests for {pnv.quarter} {pnv.year}.
       </p>
 
       {/* PNV Summary */}
@@ -36,7 +36,7 @@ export function RitualCommitment({ pnv, quests, onCommit, onBack, isCommitting }
       {/* Quests Summary */}
       <div className="w-full bg-secondary/50 rounded-lg border border-border p-6 mb-8">
         <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 font-mono">
-          Epic Quests ({quests.length})
+          Quests ({quests.length})
         </p>
         <ul className="space-y-2">
           {quests.map((q, i) => (

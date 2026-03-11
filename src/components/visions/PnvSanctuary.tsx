@@ -60,13 +60,13 @@ export function PnvSanctuary({ initial, onNext }: PnvSanctuaryProps) {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] max-w-2xl mx-auto px-4">
-      {/* Sanctuary Header */}
+      {/* Header */}
       <h2 className="font-display text-3xl sm:text-4xl text-gold mb-2 text-center">
-        The PNV Sanctuary
+        Present Narrative Vision
       </h2>
       <p className="text-muted-foreground text-sm text-center mb-8 max-w-md">
-        Enter the sanctuary. Write your Present Narrative Vision — as if it's already{" "}
-        <span className="text-gold">{format(targetDate, "MMMM d, yyyy")}</span>.
+        Write as if it's already{" "}
+        <span className="text-gold">{format(targetDate, "MMMM d, yyyy")}</span>. What have you achieved?
       </p>
 
       {/* Quarter / Year / Date row */}
@@ -154,7 +154,7 @@ export function PnvSanctuary({ initial, onNext }: PnvSanctuaryProps) {
         className="bg-gold text-gold-foreground hover:bg-gold/90 px-8"
         size="lg"
       >
-        Extract Epic Quests <ChevronRight className="w-4 h-4 ml-1" />
+        Define Quests <ChevronRight className="w-4 h-4 ml-1" />
       </Button>
     </div>
   );
