@@ -184,7 +184,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
         <h1 className="text-3xl font-display font-bold text-foreground">
           {quarterLabel} {year} Manifesto
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Your quarterly chronicle</p>
+        <p className="text-sm text-muted-foreground mt-1">Quarterly review summary</p>
       </div>
 
       {/* Vision */}
