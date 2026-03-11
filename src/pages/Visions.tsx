@@ -228,7 +228,7 @@ export default function Visions() {
               <ScrollText className="w-5 h-5 text-gold shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">Review {unreviewedQuarter.quarter} {unreviewedQuarter.year}</p>
-                <p className="text-xs text-muted-foreground">Your previous quarter awaits its chronicle</p>
+                <p className="text-xs text-muted-foreground">Your previous quarter is ready for review</p>
               </div>
               <Button size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">Review</Button>
             </CardContent>
