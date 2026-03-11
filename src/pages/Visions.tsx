@@ -210,7 +210,7 @@ export default function Visions() {
                 "It is {currentDisplayDate}, and I have..."
               </p>
               <Button onClick={() => openWizard()} variant="ghost" size="sm" className="mt-4 text-gold">
-                Begin your Nexus Ritual
+                Start New Quarter
               </Button>
             </CardContent>
           </Card>
