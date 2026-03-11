@@ -154,7 +154,7 @@ export function PnvSanctuary({ initial, onNext }: PnvSanctuaryProps) {
         className="bg-gold text-gold-foreground hover:bg-gold/90 px-8"
         size="lg"
       >
-        Extract Epic Quests <ChevronRight className="w-4 h-4 ml-1" />
+        Define Quests <ChevronRight className="w-4 h-4 ml-1" />
       </Button>
     </div>
   );

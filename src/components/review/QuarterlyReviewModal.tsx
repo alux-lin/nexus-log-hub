@@ -283,7 +283,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
           className="bg-gold text-gold-foreground hover:bg-gold/90 flex-1"
         >
           <Archive className="w-4 h-4 mr-1" />
-          {data.activeQuests.length > 0 ? "Review Unfinished Quests" : isArchiving ? "Archiving..." : "Seal This Quarter"}
+          {data.activeQuests.length > 0 ? "Review Unfinished Quests" : isArchiving ? "Archiving..." : "Archive Quarter"}
         </Button>
       </div>
     </div>

@@ -36,7 +36,7 @@ export function RitualCommitment({ pnv, quests, onCommit, onBack, isCommitting }
       {/* Quests Summary */}
       <div className="w-full bg-secondary/50 rounded-lg border border-border p-6 mb-8">
         <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 font-mono">
-          Epic Quests ({quests.length})
+          Quests ({quests.length})
         </p>
         <ul className="space-y-2">
           {quests.map((q, i) => (

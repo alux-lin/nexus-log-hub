@@ -42,10 +42,10 @@ export function GoalExtraction({ onNext, onBack, initial }: GoalExtractionProps)
     <div className="flex flex-col items-center justify-center min-h-[70vh] max-w-xl mx-auto px-4">
       <Swords className="w-10 h-10 text-gold mb-4" />
       <h2 className="font-display text-3xl text-gold mb-2 text-center">
-        Extract Epic Quests
+        Quests
       </h2>
       <p className="text-muted-foreground text-sm text-center mb-8 max-w-md">
-        From your vision, extract 3–5 concrete quests that will make it a reality. These will become active entries in your Quest Log.
+        Define 3–5 concrete quests from your vision. These become active entries in your Quest Log.
       </p>
 
       <div className="w-full space-y-3 mb-6">

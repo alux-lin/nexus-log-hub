@@ -269,7 +269,7 @@ export default function Visions() {
       {archivedReviews && archivedReviews.length > 0 && (
         <section>
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
-            Archived Chronicles
+            Past Reviews
           </h2>
           <div className="space-y-3">
             {archivedReviews.map((r: any) => {
