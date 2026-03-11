@@ -28,12 +28,7 @@ export default function Dashboard() {
   const prevLevelsRef = useRef<Record<string, number>>({});
   const hasSyncedRef = useRef(false);
 
-  // Auto-init default stats for new users
-  useEffect(() => {
-    if (!statsLoading && stats && stats.length === 0) {
-      initStats.mutate();
-    }
-  }, [statsLoading, stats]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Stats are now initialized during onboarding
 
   // Detect level-ups, sync stat values & archetype (only when statLevels actually change)
   useEffect(() => {
