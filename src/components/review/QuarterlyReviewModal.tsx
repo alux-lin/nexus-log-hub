@@ -74,7 +74,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
       });
 
       setStep("done");
-      toast({ title: "Quarter Archived ✨", description: `${quarterLabel} ${year} has been sealed into your chronicle.` });
+      toast({ title: "Quarter Archived", description: `${quarterLabel} ${year} has been archived.` });
     } catch {
       toast({ title: "Error", description: "Failed to archive quarter.", variant: "destructive" });
     } finally {
