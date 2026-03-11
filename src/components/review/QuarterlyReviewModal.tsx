@@ -85,7 +85,7 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
   if (isLoading || !data) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
-        <p className="text-muted-foreground text-sm animate-pulse">Gathering your chronicle...</p>
+        <p className="text-muted-foreground text-sm animate-pulse">Loading review...</p>
       </div>
     );
   }
