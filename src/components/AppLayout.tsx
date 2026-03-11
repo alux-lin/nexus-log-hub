@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/usePlayerData";
 import { Loader2 } from "lucide-react";
 
 interface AppLayoutProps {
@@ -11,8 +12,9 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const { session, loading } = useAuth();
+  const { data: profile, isLoading: profileLoading } = useProfile();
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-gold" />
@@ -22,6 +24,11 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   if (!session) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Redirect to onboarding if not yet completed
+  if (profile && !(profile as Record<string, unknown>).is_onboarded) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return (

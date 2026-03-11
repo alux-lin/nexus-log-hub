@@ -54,6 +54,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_onboarded: boolean
           updated_at: string
           user_id: string
           xp_base: number
@@ -66,6 +67,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_onboarded?: boolean
           updated_at?: string
           user_id: string
           xp_base?: number
@@ -78,6 +80,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_onboarded?: boolean
           updated_at?: string
           user_id?: string
           xp_base?: number
