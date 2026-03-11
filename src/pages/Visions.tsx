@@ -179,7 +179,7 @@ export default function Visions() {
           </div>
         </div>
         <Button onClick={() => openWizard()} size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">
-          <Plus className="w-4 h-4 mr-1" /> New Ritual
+          <Plus className="w-4 h-4 mr-1" /> New Quarter
         </Button>
       </div>
 
