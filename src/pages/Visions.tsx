@@ -94,8 +94,8 @@ export default function Visions() {
       }
 
       toast({
-        title: "Quarter Committed ✨",
-        description: `${pnvData.quarter} ${pnvData.year} vision saved with ${questDrafts.length} epic quest${questDrafts.length !== 1 ? "s" : ""}.`,
+        title: "Quarter Committed",
+        description: `${pnvData.quarter} ${pnvData.year} vision saved with ${questDrafts.length} quest${questDrafts.length !== 1 ? "s" : ""}.`,
       });
       setWizardOpen(false);
     } catch {
