@@ -130,6 +130,30 @@ export default function StartQuestForm({ onSubmit, onCancel, isPending }: StartQ
         ))}
       </div>
 
+      {/* Priority */}
+      <div className="space-y-2">
+        <Label>Priority</Label>
+        <div className="flex gap-2">
+          {(["low", "medium", "high"] as const).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPriority(p)}
+              className={cn(
+                "px-3 py-1.5 text-xs rounded-md border capitalize transition-colors",
+                priority === p
+                  ? p === "high" ? "bg-destructive/10 text-destructive border-destructive/30"
+                    : p === "medium" ? "bg-gold/10 text-gold border-gold/30"
+                    : "bg-muted text-muted-foreground border-border"
+                  : "bg-card text-muted-foreground border-border hover:bg-muted"
+              )}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label>Target Date</Label>
         <Popover>
