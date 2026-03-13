@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { ScrollText, Plus, Swords, Trophy, CalendarClock, X } from "lucide-react";
+import { ScrollText, Plus, Swords, Trophy, CalendarClock, X, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,6 +23,7 @@ export default function QuestLog() {
   const [completingQuest, setCompletingQuest] = useState<{ id: string; title: string } | null>(null);
   const [filterStat, setFilterStat] = useState<string>("all");
   const [filterQuarter, setFilterQuarter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   const quarterOptions = useMemo(() => {
     const quarters = new Set<string>();
@@ -40,7 +41,25 @@ export default function QuestLog() {
     });
   }, [filterStat, filterQuarter]);
 
-  const filteredActive = useMemo(() => filterQuests(activeQuests), [filterQuests, activeQuests]);
+  const sortQuests = useCallback((quests: any[]) => {
+    return [...quests].sort((a, b) => {
+      switch (sortBy) {
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "due":
+          if (!a.target_completion_date && !b.target_completion_date) return 0;
+          if (!a.target_completion_date) return 1;
+          if (!b.target_completion_date) return -1;
+          return new Date(a.target_completion_date).getTime() - new Date(b.target_completion_date).getTime();
+        case "stat":
+          return (a.stat_definitions?.name ?? "").localeCompare(b.stat_definitions?.name ?? "");
+        default: // newest
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+  }, [sortBy]);
+
+  const filteredActive = useMemo(() => sortQuests(filterQuests(activeQuests)), [sortQuests, filterQuests, activeQuests]);
   const filteredCompleted = useMemo(() => filterQuests(completedQuests), [filterQuests, completedQuests]);
   const hasFilters = filterStat !== "all" || filterQuarter !== "all";
 
@@ -188,6 +207,20 @@ export default function QuestLog() {
               ))}
             </SelectContent>
           </Select>
+          <div className="flex items-center gap-1.5 ml-auto">
+            <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[150px] h-8 text-xs border-none shadow-none px-1 focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+                <SelectItem value="due">Due date (soonest)</SelectItem>
+                <SelectItem value="stat">By stat</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {hasFilters && (
             <button
               onClick={() => { setFilterStat("all"); setFilterQuarter("all"); }}
