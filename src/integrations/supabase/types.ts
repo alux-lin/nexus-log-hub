@@ -201,6 +201,7 @@ export type Database = {
           created_at: string
           id: string
           impact: number
+          priority: string
           quarter: string | null
           reflection: string | null
           status: string
@@ -215,6 +216,7 @@ export type Database = {
           created_at?: string
           id?: string
           impact?: number
+          priority?: string
           quarter?: string | null
           reflection?: string | null
           status?: string
@@ -229,6 +231,7 @@ export type Database = {
           created_at?: string
           id?: string
           impact?: number
+          priority?: string
           quarter?: string | null
           reflection?: string | null
           status?: string
