@@ -127,6 +127,14 @@ export default function QuestLog() {
           </Button>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <span className={cn(
+            "inline-flex items-center text-[10px] rounded-full px-2 py-0.5 font-medium capitalize",
+            quest.priority === "high" ? "bg-destructive/10 text-destructive" :
+            quest.priority === "low" ? "bg-muted text-muted-foreground" :
+            "bg-gold/10 text-gold"
+          )}>
+            {quest.priority ?? "medium"}
+          </span>
           {quest.stat_definitions && (
             <span className="inline-flex items-center text-[10px] border border-border rounded-full px-2 py-0.5">
               <span className="w-1.5 h-1.5 rounded-full mr-1.5" style={{ background: quest.stat_definitions.color ?? undefined }} />
