@@ -64,9 +64,9 @@ export default function QuestLog() {
   const hasFilters = filterStat !== "all" || filterQuarter !== "all";
 
   const handleStart = useCallback(
-    (data: { title: string; category_stat_id: string | null; target_completion_date: string | null }) => {
+    (data: { title: string; category_stat_id: string | null; target_completion_date: string | null; priority: string; statRewards: { stat_id: string; xp_amount: number }[] }) => {
       if (startQuest.isPending) return;
-      startQuest.mutate(data, {
+      const { statRewards, ...questData } = data;
         onSuccess: () => {
           setStartOpen(false);
           toast.success("Quest started! 🗡️");
