@@ -62,6 +62,7 @@ export default function StartQuestForm({ onSubmit, onCancel, isPending }: StartQ
       title: title.trim(),
       category_stat_id: statRewards.length === 1 ? statRewards[0].stat_id : null,
       target_completion_date: date ? format(date, "yyyy-MM-dd") : null,
+      priority,
       statRewards,
     });
   };
