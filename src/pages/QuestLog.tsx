@@ -207,6 +207,20 @@ export default function QuestLog() {
               ))}
             </SelectContent>
           </Select>
+          <div className="flex items-center gap-1.5 ml-auto">
+            <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[150px] h-8 text-xs border-none shadow-none px-1 focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+                <SelectItem value="due">Due date (soonest)</SelectItem>
+                <SelectItem value="stat">By stat</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {hasFilters && (
             <button
               onClick={() => { setFilterStat("all"); setFilterQuarter("all"); }}
