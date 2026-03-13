@@ -31,6 +31,7 @@ export default function StartQuestForm({ onSubmit, onCancel, isPending }: StartQ
   const xpPresets = getXpPresets(profile?.xp_base ?? 5);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState<Date>();
+  const [priority, setPriority] = useState("medium");
   const [statRewards, setStatRewards] = useState<StatReward[]>([]);
 
   const addReward = () => {

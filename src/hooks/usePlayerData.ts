@@ -136,7 +136,7 @@ export function useStartQuest() {
   const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (quest: { title: string; category_stat_id?: string | null; target_completion_date?: string | null }) => {
+    mutationFn: async (quest: { title: string; category_stat_id?: string | null; target_completion_date?: string | null; priority?: string }) => {
       const now = new Date();
       const quarter = `Q${Math.ceil((now.getMonth() + 1) / 3)} ${now.getFullYear()}`;
       const { error } = await supabase.from("quests").insert({
@@ -144,6 +144,7 @@ export function useStartQuest() {
         user_id: user!.id,
         status: "active",
         quarter,
+        priority: quest.priority ?? "medium",
       });
       if (error) throw error;
     },
