@@ -20,7 +20,7 @@ interface StatReward {
 }
 
 interface StartQuestFormProps {
-  onSubmit: (data: { title: string; category_stat_id: string | null; target_completion_date: string | null; statRewards: StatReward[] }) => void;
+  onSubmit: (data: { title: string; category_stat_id: string | null; target_completion_date: string | null; priority: string; statRewards: StatReward[] }) => void;
   onCancel: () => void;
   isPending?: boolean;
 }
