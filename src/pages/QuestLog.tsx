@@ -232,6 +232,7 @@ export default function QuestLog() {
                 <SelectItem value="oldest">Oldest first</SelectItem>
                 <SelectItem value="due">Due date (soonest)</SelectItem>
                 <SelectItem value="stat">By stat</SelectItem>
+                <SelectItem value="priority">Priority</SelectItem>
               </SelectContent>
             </Select>
           </div>
