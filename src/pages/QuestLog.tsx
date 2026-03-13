@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { ScrollText, Plus, Swords, Trophy, CalendarClock, X } from "lucide-react";
+import { ScrollText, Plus, Swords, Trophy, CalendarClock, X, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
