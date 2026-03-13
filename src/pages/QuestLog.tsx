@@ -67,6 +67,7 @@ export default function QuestLog() {
     (data: { title: string; category_stat_id: string | null; target_completion_date: string | null; priority: string; statRewards: { stat_id: string; xp_amount: number }[] }) => {
       if (startQuest.isPending) return;
       const { statRewards, ...questData } = data;
+      startQuest.mutate(questData, {
         onSuccess: () => {
           setStartOpen(false);
           toast.success("Quest started! 🗡️");
