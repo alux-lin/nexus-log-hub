@@ -15,11 +15,34 @@ import { format } from "date-fns";
 export default function QuestLog() {
   const { data: activeQuests, isLoading: loadingActive } = useActiveQuests();
   const { data: completedQuests, isLoading: loadingCompleted } = useCompletedQuests();
+  const { data: stats } = useStats();
   const startQuest = useStartQuest();
   const completeQuest = useCompleteQuest();
   const deleteQuest = useDeleteQuest();
   const [startOpen, setStartOpen] = useState(false);
   const [completingQuest, setCompletingQuest] = useState<{ id: string; title: string } | null>(null);
+  const [filterStat, setFilterStat] = useState<string>("all");
+  const [filterQuarter, setFilterQuarter] = useState<string>("all");
+
+  const quarterOptions = useMemo(() => {
+    const quarters = new Set<string>();
+    activeQuests?.forEach((q: any) => q.quarter && quarters.add(q.quarter));
+    completedQuests?.forEach((q: any) => q.quarter && quarters.add(q.quarter));
+    return Array.from(quarters).sort().reverse();
+  }, [activeQuests, completedQuests]);
+
+  const filterQuests = useCallback((quests: any[] | undefined) => {
+    if (!quests) return [];
+    return quests.filter((q: any) => {
+      if (filterStat !== "all" && q.category_stat_id !== filterStat) return false;
+      if (filterQuarter !== "all" && q.quarter !== filterQuarter) return false;
+      return true;
+    });
+  }, [filterStat, filterQuarter]);
+
+  const filteredActive = useMemo(() => filterQuests(activeQuests), [filterQuests, activeQuests]);
+  const filteredCompleted = useMemo(() => filterQuests(completedQuests), [filterQuests, completedQuests]);
+  const hasFilters = filterStat !== "all" || filterQuarter !== "all";
 
   const handleStart = useCallback(
     (data: { title: string; category_stat_id: string | null; target_completion_date: string | null }) => {
