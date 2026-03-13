@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
-import { ScrollText, Plus, Swords, Trophy, CalendarClock } from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import { ScrollText, Plus, Swords, Trophy, CalendarClock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { useActiveQuests, useCompletedQuests, useStartQuest, useCompleteQuest, useDeleteQuest } from "@/hooks/usePlayerData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useActiveQuests, useCompletedQuests, useStartQuest, useCompleteQuest, useDeleteQuest, useStats } from "@/hooks/usePlayerData";
 import { toast } from "sonner";
 import StartQuestForm from "@/components/quests/StartQuestForm";
 import CompleteQuestModal from "@/components/quests/CompleteQuestModal";
@@ -14,11 +15,34 @@ import { format } from "date-fns";
 export default function QuestLog() {
   const { data: activeQuests, isLoading: loadingActive } = useActiveQuests();
   const { data: completedQuests, isLoading: loadingCompleted } = useCompletedQuests();
+  const { data: stats } = useStats();
   const startQuest = useStartQuest();
   const completeQuest = useCompleteQuest();
   const deleteQuest = useDeleteQuest();
   const [startOpen, setStartOpen] = useState(false);
   const [completingQuest, setCompletingQuest] = useState<{ id: string; title: string } | null>(null);
+  const [filterStat, setFilterStat] = useState<string>("all");
+  const [filterQuarter, setFilterQuarter] = useState<string>("all");
+
+  const quarterOptions = useMemo(() => {
+    const quarters = new Set<string>();
+    activeQuests?.forEach((q: any) => q.quarter && quarters.add(q.quarter));
+    completedQuests?.forEach((q: any) => q.quarter && quarters.add(q.quarter));
+    return Array.from(quarters).sort().reverse();
+  }, [activeQuests, completedQuests]);
+
+  const filterQuests = useCallback((quests: any[] | undefined) => {
+    if (!quests) return [];
+    return quests.filter((q: any) => {
+      if (filterStat !== "all" && q.category_stat_id !== filterStat) return false;
+      if (filterQuarter !== "all" && q.quarter !== filterQuarter) return false;
+      return true;
+    });
+  }, [filterStat, filterQuarter]);
+
+  const filteredActive = useMemo(() => filterQuests(activeQuests), [filterQuests, activeQuests]);
+  const filteredCompleted = useMemo(() => filterQuests(completedQuests), [filterQuests, completedQuests]);
+  const hasFilters = filterStat !== "all" || filterQuarter !== "all";
 
   const handleStart = useCallback(
     (data: { title: string; category_stat_id: string | null; target_completion_date: string | null }) => {
@@ -134,23 +158,56 @@ export default function QuestLog() {
       <Tabs defaultValue="active" className="space-y-6">
         <TabsList>
           <TabsTrigger value="active" className="gap-1.5">
-            <Swords className="w-3.5 h-3.5" /> Active ({activeQuests?.length ?? 0})
+            <Swords className="w-3.5 h-3.5" /> Active ({filteredActive.length})
           </TabsTrigger>
           <TabsTrigger value="completed" className="gap-1.5">
-            <Trophy className="w-3.5 h-3.5" /> Completed ({completedQuests?.length ?? 0})
+            <Trophy className="w-3.5 h-3.5" /> Completed ({filteredCompleted.length})
           </TabsTrigger>
         </TabsList>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <Select value={filterStat} onValueChange={setFilterStat}>
+            <SelectTrigger className="w-[180px] h-8 text-xs">
+              <SelectValue placeholder="All Stats" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Stats</SelectItem>
+              {stats?.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterQuarter} onValueChange={setFilterQuarter}>
+            <SelectTrigger className="w-[160px] h-8 text-xs">
+              <SelectValue placeholder="All Quarters" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Quarters</SelectItem>
+              {quarterOptions.map((q) => (
+                <SelectItem key={q} value={q}>{q}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {hasFilters && (
+            <button
+              onClick={() => { setFilterStat("all"); setFilterQuarter("all"); }}
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              <X className="w-3 h-3" /> Clear filters
+            </button>
+          )}
+        </div>
 
         <TabsContent value="active">
           {loadingActive ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[1, 2].map((i) => <Card key={i} className="animate-pulse h-24 bg-card border-border" />)}
             </div>
-          ) : !activeQuests?.length ? (
-            renderEmpty("No active quests. Start one to begin your journey.", true)
+          ) : !filteredActive.length ? (
+            renderEmpty(hasFilters ? "No quests match your filters." : "No active quests. Start one to begin your journey.", !hasFilters)
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activeQuests.map(renderActiveCard)}
+              {filteredActive.map(renderActiveCard)}
             </div>
           )}
         </TabsContent>
@@ -160,11 +217,11 @@ export default function QuestLog() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[1, 2].map((i) => <Card key={i} className="animate-pulse h-28 bg-card border-border" />)}
             </div>
-          ) : !completedQuests?.length ? (
-            renderEmpty("No completed quests yet. Complete an active quest to see it here.")
+          ) : !filteredCompleted.length ? (
+            renderEmpty(hasFilters ? "No quests match your filters." : "No completed quests yet. Complete an active quest to see it here.")
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {completedQuests.map((quest) => (
+              {filteredCompleted.map((quest) => (
                 <QuestCard key={quest.id} quest={quest as any} onDelete={handleDelete} />
               ))}
             </div>
