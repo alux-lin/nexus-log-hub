@@ -41,7 +41,25 @@ export default function QuestLog() {
     });
   }, [filterStat, filterQuarter]);
 
-  const filteredActive = useMemo(() => filterQuests(activeQuests), [filterQuests, activeQuests]);
+  const sortQuests = useCallback((quests: any[]) => {
+    return [...quests].sort((a, b) => {
+      switch (sortBy) {
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "due":
+          if (!a.target_completion_date && !b.target_completion_date) return 0;
+          if (!a.target_completion_date) return 1;
+          if (!b.target_completion_date) return -1;
+          return new Date(a.target_completion_date).getTime() - new Date(b.target_completion_date).getTime();
+        case "stat":
+          return (a.stat_definitions?.name ?? "").localeCompare(b.stat_definitions?.name ?? "");
+        default: // newest
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+  }, [sortBy]);
+
+  const filteredActive = useMemo(() => sortQuests(filterQuests(activeQuests)), [sortQuests, filterQuests, activeQuests]);
   const filteredCompleted = useMemo(() => filterQuests(completedQuests), [filterQuests, completedQuests]);
   const hasFilters = filterStat !== "all" || filterQuarter !== "all";
 
