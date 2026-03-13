@@ -23,6 +23,7 @@ export default function QuestLog() {
   const [completingQuest, setCompletingQuest] = useState<{ id: string; title: string } | null>(null);
   const [filterStat, setFilterStat] = useState<string>("all");
   const [filterQuarter, setFilterQuarter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   const quarterOptions = useMemo(() => {
     const quarters = new Set<string>();
