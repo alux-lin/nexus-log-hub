@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
-import { ScrollText, Plus, Swords, Trophy, CalendarClock } from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import { ScrollText, Plus, Swords, Trophy, CalendarClock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { useActiveQuests, useCompletedQuests, useStartQuest, useCompleteQuest, useDeleteQuest } from "@/hooks/usePlayerData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useActiveQuests, useCompletedQuests, useStartQuest, useCompleteQuest, useDeleteQuest, useStats } from "@/hooks/usePlayerData";
 import { toast } from "sonner";
 import StartQuestForm from "@/components/quests/StartQuestForm";
 import CompleteQuestModal from "@/components/quests/CompleteQuestModal";
