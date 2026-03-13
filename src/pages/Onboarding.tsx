@@ -129,8 +129,10 @@ export default function Onboarding() {
         if (questError) throw questError;
       }
 
-      // Invalidate and navigate
-      await qc.invalidateQueries({ queryKey: ["profile"] });
+      // Optimistically update the profile cache so AppLayout doesn't redirect back
+      qc.setQueryData(["profile", user.id], (old: any) =>
+        old ? { ...old, is_onboarded: true, archetype_class: selectedArchetype } : old
+      );
       await qc.invalidateQueries({ queryKey: ["stats"] });
       await qc.invalidateQueries({ queryKey: ["inventory"] });
       await qc.invalidateQueries({ queryKey: ["quests"] });
