@@ -54,6 +54,10 @@ export default function QuestLog() {
           return new Date(a.target_completion_date).getTime() - new Date(b.target_completion_date).getTime();
         case "stat":
           return (a.stat_definitions?.name ?? "").localeCompare(b.stat_definitions?.name ?? "");
+        case "priority": {
+          const order = { high: 0, medium: 1, low: 2 } as Record<string, number>;
+          return (order[a.priority] ?? 1) - (order[b.priority] ?? 1);
+        }
         default: // newest
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
