@@ -20,7 +20,7 @@ interface StatReward {
 }
 
 interface StartQuestFormProps {
-  onSubmit: (data: { title: string; category_stat_id: string | null; target_completion_date: string | null; statRewards: StatReward[] }) => void;
+  onSubmit: (data: { title: string; category_stat_id: string | null; target_completion_date: string | null; priority: string; statRewards: StatReward[] }) => void;
   onCancel: () => void;
   isPending?: boolean;
 }
@@ -31,6 +31,7 @@ export default function StartQuestForm({ onSubmit, onCancel, isPending }: StartQ
   const xpPresets = getXpPresets(profile?.xp_base ?? 5);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState<Date>();
+  const [priority, setPriority] = useState("medium");
   const [statRewards, setStatRewards] = useState<StatReward[]>([]);
 
   const addReward = () => {
@@ -61,6 +62,7 @@ export default function StartQuestForm({ onSubmit, onCancel, isPending }: StartQ
       title: title.trim(),
       category_stat_id: statRewards.length === 1 ? statRewards[0].stat_id : null,
       target_completion_date: date ? format(date, "yyyy-MM-dd") : null,
+      priority,
       statRewards,
     });
   };
@@ -126,6 +128,30 @@ export default function StartQuestForm({ onSubmit, onCancel, isPending }: StartQ
             </Button>
           </div>
         ))}
+      </div>
+
+      {/* Priority */}
+      <div className="space-y-2">
+        <Label>Priority</Label>
+        <div className="flex gap-2">
+          {(["low", "medium", "high"] as const).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPriority(p)}
+              className={cn(
+                "px-3 py-1.5 text-xs rounded-md border capitalize transition-colors",
+                priority === p
+                  ? p === "high" ? "bg-destructive/10 text-destructive border-destructive/30"
+                    : p === "medium" ? "bg-gold/10 text-gold border-gold/30"
+                    : "bg-muted text-muted-foreground border-border"
+                  : "bg-card text-muted-foreground border-border hover:bg-muted"
+              )}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-2">

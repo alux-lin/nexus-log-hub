@@ -11,6 +11,7 @@ import StartQuestForm from "@/components/quests/StartQuestForm";
 import CompleteQuestModal from "@/components/quests/CompleteQuestModal";
 import QuestCard from "@/components/quests/QuestCard";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function QuestLog() {
   const { data: activeQuests, isLoading: loadingActive } = useActiveQuests();
@@ -53,6 +54,10 @@ export default function QuestLog() {
           return new Date(a.target_completion_date).getTime() - new Date(b.target_completion_date).getTime();
         case "stat":
           return (a.stat_definitions?.name ?? "").localeCompare(b.stat_definitions?.name ?? "");
+        case "priority": {
+          const order = { high: 0, medium: 1, low: 2 } as Record<string, number>;
+          return (order[a.priority] ?? 1) - (order[b.priority] ?? 1);
+        }
         default: // newest
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
@@ -64,9 +69,10 @@ export default function QuestLog() {
   const hasFilters = filterStat !== "all" || filterQuarter !== "all";
 
   const handleStart = useCallback(
-    (data: { title: string; category_stat_id: string | null; target_completion_date: string | null }) => {
+    (data: { title: string; category_stat_id: string | null; target_completion_date: string | null; priority: string; statRewards: { stat_id: string; xp_amount: number }[] }) => {
       if (startQuest.isPending) return;
-      startQuest.mutate(data, {
+      const { statRewards, ...questData } = data;
+      startQuest.mutate(questData, {
         onSuccess: () => {
           setStartOpen(false);
           toast.success("Quest started! 🗡️");
@@ -126,6 +132,14 @@ export default function QuestLog() {
           </Button>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <span className={cn(
+            "inline-flex items-center text-[10px] rounded-full px-2 py-0.5 font-medium capitalize",
+            quest.priority === "high" ? "bg-destructive/10 text-destructive" :
+            quest.priority === "low" ? "bg-muted text-muted-foreground" :
+            "bg-gold/10 text-gold"
+          )}>
+            {quest.priority ?? "medium"}
+          </span>
           {quest.stat_definitions && (
             <span className="inline-flex items-center text-[10px] border border-border rounded-full px-2 py-0.5">
               <span className="w-1.5 h-1.5 rounded-full mr-1.5" style={{ background: quest.stat_definitions.color ?? undefined }} />
@@ -218,6 +232,7 @@ export default function QuestLog() {
                 <SelectItem value="oldest">Oldest first</SelectItem>
                 <SelectItem value="due">Due date (soonest)</SelectItem>
                 <SelectItem value="stat">By stat</SelectItem>
+                <SelectItem value="priority">Priority</SelectItem>
               </SelectContent>
             </Select>
           </div>
