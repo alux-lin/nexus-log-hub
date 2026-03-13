@@ -11,6 +11,7 @@ import StartQuestForm from "@/components/quests/StartQuestForm";
 import CompleteQuestModal from "@/components/quests/CompleteQuestModal";
 import QuestCard from "@/components/quests/QuestCard";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function QuestLog() {
   const { data: activeQuests, isLoading: loadingActive } = useActiveQuests();
