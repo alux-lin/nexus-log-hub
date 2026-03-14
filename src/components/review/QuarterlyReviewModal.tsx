@@ -13,15 +13,25 @@ interface Props {
   quarterLabel: string;
   year: number;
   onClose: () => void;
+  archivedData?: ManifestoData;
 }
 
 type Step = "manifesto" | "triage" | "done";
 
-export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
-  const { data, isLoading } = useManifestoBuilder(quarterLabel, year);
+export function QuarterlyReviewModal({ quarterLabel, year, onClose, archivedData }: Props) {
+  const { data: liveData, isLoading } = useManifestoBuilder(quarterLabel, year);
   const statLevels = useStatLevels();
   const archiveQuarter = useArchiveQuarter();
   const { toast } = useToast();
+  const readOnly = !!archivedData;
+
+  // Use archived data if provided, otherwise use live data
+  const data = archivedData
+    ? {
+        ...archivedData,
+        activeQuests: [] as { id: string; title: string }[],
+      }
+    : liveData;
 
   const [step, setStep] = useState<Step>("manifesto");
   const [carryOver, setCarryOver] = useState<Set<string>>(new Set());
