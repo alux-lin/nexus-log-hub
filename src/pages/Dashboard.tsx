@@ -104,7 +104,25 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Quarter-end warning banner */}
+      {showBanner && (
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-gold/30 bg-gold/10 px-5 py-3 text-sm text-foreground">
+          <AlertTriangle className="w-5 h-5 text-gold shrink-0" />
+          <span className="flex-1">
+            Q{quarterWarning.q} {quarterWarning.year} ends in{" "}
+            <strong>{quarterWarning.daysLeft} day{quarterWarning.daysLeft !== 1 ? "s" : ""}</strong>
+            {" — time to review your quests.{" "}
+            <Link to="/visions" className="text-gold underline underline-offset-2 hover:text-gold/80">
+              Visit Visions →
+            </Link>
+          </span>
+          <button onClick={dismissBanner} className="text-muted-foreground hover:text-foreground p-1">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {[
           { label: "Active Quests", value: String(questCount ?? 0), sub: "This quarter" },
