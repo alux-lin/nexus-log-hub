@@ -283,6 +283,7 @@ export default function Visions() {
                   className="border-border cursor-pointer hover:border-muted-foreground/30 transition-colors"
                   onClick={() => {
                     setReviewQuarter({ q: r.quarter_label, y: r.year });
+                    setReviewArchivedData(r.manifesto_data as ManifestoData);
                     setReviewOpen(true);
                   }}
                 >
