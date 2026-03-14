@@ -120,9 +120,11 @@ export default function Visions() {
       <QuarterlyReviewModal
         quarterLabel={reviewQuarter.q}
         year={reviewQuarter.y}
+        archivedData={reviewArchivedData ?? undefined}
         onClose={() => {
           setReviewOpen(false);
           setReviewQuarter(null);
+          setReviewArchivedData(null);
         }}
       />
     );
