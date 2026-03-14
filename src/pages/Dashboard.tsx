@@ -13,6 +13,8 @@ import {
 import { useProfile, useStats, useInitDefaultStats, useQuestCount, useInventoryCount, useCurrentVision, useUpdateProfile, useUpdateStat } from "@/hooks/usePlayerData";
 import { useStatLevels, getDominantArchetype } from "@/hooks/useStatLevels";
 import { useToast } from "@/hooks/use-toast";
+import { useUnreviewedQuarter } from "@/hooks/useQuarterlyReview";
+import { QuarterlyReviewModal } from "@/components/review/QuarterlyReviewModal";
 
 export default function Dashboard() {
   const { data: profile } = useProfile();
