@@ -13,15 +13,25 @@ interface Props {
   quarterLabel: string;
   year: number;
   onClose: () => void;
+  archivedData?: ManifestoData;
 }
 
 type Step = "manifesto" | "triage" | "done";
 
-export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
-  const { data, isLoading } = useManifestoBuilder(quarterLabel, year);
+export function QuarterlyReviewModal({ quarterLabel, year, onClose, archivedData }: Props) {
+  const { data: liveData, isLoading } = useManifestoBuilder(quarterLabel, year);
   const statLevels = useStatLevels();
   const archiveQuarter = useArchiveQuarter();
   const { toast } = useToast();
+  const readOnly = !!archivedData;
+
+  // Use archived data if provided, otherwise use live data
+  const data = archivedData
+    ? {
+        ...archivedData,
+        activeQuests: [] as { id: string; title: string }[],
+      }
+    : liveData;
 
   const [step, setStep] = useState<Step>("manifesto");
   const [carryOver, setCarryOver] = useState<Set<string>>(new Set());
@@ -277,14 +287,16 @@ export function QuarterlyReviewModal({ quarterLabel, year, onClose }: Props) {
       {/* Actions */}
       <div className="flex gap-3">
         <Button variant="ghost" onClick={onClose}>Close</Button>
-        <Button
-          onClick={() => data.activeQuests.length > 0 ? setStep("triage") : handleArchive()}
-          disabled={isArchiving}
-          className="bg-gold text-gold-foreground hover:bg-gold/90 flex-1"
-        >
-          <Archive className="w-4 h-4 mr-1" />
-          {data.activeQuests.length > 0 ? "Review Unfinished Quests" : isArchiving ? "Archiving..." : "Archive Quarter"}
-        </Button>
+        {!readOnly && (
+          <Button
+            onClick={() => data.activeQuests.length > 0 ? setStep("triage") : handleArchive()}
+            disabled={isArchiving}
+            className="bg-gold text-gold-foreground hover:bg-gold/90 flex-1"
+          >
+            <Archive className="w-4 h-4 mr-1" />
+            {data.activeQuests.length > 0 ? "Review Unfinished Quests" : isArchiving ? "Archiving..." : "Archive Quarter"}
+          </Button>
+        )}
       </div>
     </div>
   );

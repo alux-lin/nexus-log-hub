@@ -4,7 +4,7 @@ import { Eye, Plus, Sparkles, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentVision, useAllVisions, useSaveVision, useStartQuest } from "@/hooks/usePlayerData";
-import { useUnreviewedQuarter, useArchivedReviews } from "@/hooks/useQuarterlyReview";
+import { useUnreviewedQuarter, useArchivedReviews, type ManifestoData } from "@/hooks/useQuarterlyReview";
 import { useToast } from "@/hooks/use-toast";
 import { RitualStepper } from "@/components/visions/RitualStepper";
 import { PnvSanctuary, type PnvData } from "@/components/visions/PnvSanctuary";
@@ -45,6 +45,7 @@ export default function Visions() {
   // Review state
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewQuarter, setReviewQuarter] = useState<{ q: string; y: number } | null>(null);
+  const [reviewArchivedData, setReviewArchivedData] = useState<any>(null);
   const [autoPrompted, setAutoPrompted] = useState(false);
 
   // Auto-prompt for unreviewed quarter
@@ -119,9 +120,11 @@ export default function Visions() {
       <QuarterlyReviewModal
         quarterLabel={reviewQuarter.q}
         year={reviewQuarter.y}
+        archivedData={reviewArchivedData ?? undefined}
         onClose={() => {
           setReviewOpen(false);
           setReviewQuarter(null);
+          setReviewArchivedData(null);
         }}
       />
     );
@@ -280,6 +283,7 @@ export default function Visions() {
                   className="border-border cursor-pointer hover:border-muted-foreground/30 transition-colors"
                   onClick={() => {
                     setReviewQuarter({ q: r.quarter_label, y: r.year });
+                    setReviewArchivedData(r.manifesto_data as ManifestoData);
                     setReviewOpen(true);
                   }}
                 >
