@@ -29,7 +29,24 @@ export default function Dashboard() {
   const prevLevelsRef = useRef<Record<string, number>>({});
   const hasSyncedRef = useRef(false);
 
-  // Stats are now initialized during onboarding
+  // Quarter-end warning
+  const quarterWarning = useMemo(() => {
+    const now = new Date();
+    const q = Math.ceil((now.getMonth() + 1) / 3);
+    const endMonth = q * 3; // 3,6,9,12
+    const endDate = new Date(now.getFullYear(), endMonth, 0); // last day of quarter
+    const daysLeft = Math.ceil((endDate.getTime() - now.getTime()) / 86400000);
+    return { q, year: now.getFullYear(), daysLeft };
+  }, []);
+
+  const dismissKey = `nexus-quarter-warn-dismissed-${new Date().toISOString().slice(0, 10)}`;
+  const [bannerDismissed, setBannerDismissed] = useState(() => localStorage.getItem(dismissKey) === "1");
+  const showBanner = quarterWarning.daysLeft <= 14 && !bannerDismissed;
+
+  const dismissBanner = () => {
+    localStorage.setItem(dismissKey, "1");
+    setBannerDismissed(true);
+  };
 
   // Detect level-ups, sync stat values & archetype (only when statLevels actually change)
   useEffect(() => {
