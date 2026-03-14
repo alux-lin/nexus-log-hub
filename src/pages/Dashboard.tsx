@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { LayoutDashboard, Shield, AlertTriangle, X } from "lucide-react";
+import { LayoutDashboard, Shield, AlertTriangle, X, ScrollText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Radar,
   RadarChart,
