@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
-import { LayoutDashboard, Shield } from "lucide-react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { LayoutDashboard, Shield, AlertTriangle, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   Radar,
   RadarChart,
@@ -28,7 +29,24 @@ export default function Dashboard() {
   const prevLevelsRef = useRef<Record<string, number>>({});
   const hasSyncedRef = useRef(false);
 
-  // Stats are now initialized during onboarding
+  // Quarter-end warning
+  const quarterWarning = useMemo(() => {
+    const now = new Date();
+    const q = Math.ceil((now.getMonth() + 1) / 3);
+    const endMonth = q * 3; // 3,6,9,12
+    const endDate = new Date(now.getFullYear(), endMonth, 0); // last day of quarter
+    const daysLeft = Math.ceil((endDate.getTime() - now.getTime()) / 86400000);
+    return { q, year: now.getFullYear(), daysLeft };
+  }, []);
+
+  const dismissKey = `nexus-quarter-warn-dismissed-${new Date().toISOString().slice(0, 10)}`;
+  const [bannerDismissed, setBannerDismissed] = useState(() => localStorage.getItem(dismissKey) === "1");
+  const showBanner = quarterWarning.daysLeft <= 14 && !bannerDismissed;
+
+  const dismissBanner = () => {
+    localStorage.setItem(dismissKey, "1");
+    setBannerDismissed(true);
+  };
 
   // Detect level-ups, sync stat values & archetype (only when statLevels actually change)
   useEffect(() => {
@@ -86,7 +104,25 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Quarter-end warning banner */}
+      {showBanner && (
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-gold/30 bg-gold/10 px-5 py-3 text-sm text-foreground">
+          <AlertTriangle className="w-5 h-5 text-gold shrink-0" />
+          <span className="flex-1">
+            Q{quarterWarning.q} {quarterWarning.year} ends in{" "}
+            <strong>{quarterWarning.daysLeft} day{quarterWarning.daysLeft !== 1 ? "s" : ""}</strong>
+            {" — time to review your quests. "}
+            <Link to="/visions" className="text-gold underline underline-offset-2 hover:text-gold/80">
+              Visit Visions →
+            </Link>
+          </span>
+          <button onClick={dismissBanner} className="text-muted-foreground hover:text-foreground p-1">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {[
           { label: "Active Quests", value: String(questCount ?? 0), sub: "This quarter" },
