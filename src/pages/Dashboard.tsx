@@ -28,6 +28,8 @@ export default function Dashboard() {
   const { toast } = useToast();
   const visionText = currentVision?.vision_text ?? null;
   const statLevels = useStatLevels();
+  const { data: unreviewedQuarter } = useUnreviewedQuarter();
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const prevLevelsRef = useRef<Record<string, number>>({});
   const hasSyncedRef = useRef(false);
