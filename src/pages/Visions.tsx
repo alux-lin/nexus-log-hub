@@ -45,6 +45,7 @@ export default function Visions() {
   // Review state
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewQuarter, setReviewQuarter] = useState<{ q: string; y: number } | null>(null);
+  const [reviewArchivedData, setReviewArchivedData] = useState<any>(null);
   const [autoPrompted, setAutoPrompted] = useState(false);
 
   // Auto-prompt for unreviewed quarter
