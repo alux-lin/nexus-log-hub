@@ -111,7 +111,7 @@ export default function Dashboard() {
           <span className="flex-1">
             Q{quarterWarning.q} {quarterWarning.year} ends in{" "}
             <strong>{quarterWarning.daysLeft} day{quarterWarning.daysLeft !== 1 ? "s" : ""}</strong>
-            {" — time to review your quests.{" "}
+            {" — time to review your quests. "}
             <Link to="/visions" className="text-gold underline underline-offset-2 hover:text-gold/80">
               Visit Visions →
             </Link>
