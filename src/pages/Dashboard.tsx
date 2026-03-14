@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { LayoutDashboard, Shield, AlertTriangle, X } from "lucide-react";
+import { LayoutDashboard, Shield, AlertTriangle, X, ScrollText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Radar,
   RadarChart,
@@ -12,6 +13,8 @@ import {
 import { useProfile, useStats, useInitDefaultStats, useQuestCount, useInventoryCount, useCurrentVision, useUpdateProfile, useUpdateStat } from "@/hooks/usePlayerData";
 import { useStatLevels, getDominantArchetype } from "@/hooks/useStatLevels";
 import { useToast } from "@/hooks/use-toast";
+import { useUnreviewedQuarter } from "@/hooks/useQuarterlyReview";
+import { QuarterlyReviewModal } from "@/components/review/QuarterlyReviewModal";
 
 export default function Dashboard() {
   const { data: profile } = useProfile();
@@ -25,6 +28,8 @@ export default function Dashboard() {
   const { toast } = useToast();
   const visionText = currentVision?.vision_text ?? null;
   const statLevels = useStatLevels();
+  const { data: unreviewedQuarter } = useUnreviewedQuarter();
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const prevLevelsRef = useRef<Record<string, number>>({});
   const hasSyncedRef = useRef(false);
@@ -121,6 +126,42 @@ export default function Dashboard() {
           </button>
         </div>
       )}
+
+      {/* Unreviewed quarter prompt */}
+      {unreviewedQuarter && (
+        <button
+          onClick={() => setReviewOpen(true)}
+          className="mb-6 w-full text-left bg-card border border-gold/30 rounded-xl p-5 hover:border-gold/50 transition-colors group"
+        >
+          <div className="flex items-center gap-3">
+            <ScrollText className="w-6 h-6 text-gold shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs uppercase tracking-widest text-gold font-medium mb-1">Review Available</p>
+              <p className="text-sm text-foreground font-medium">
+                {unreviewedQuarter.quarter} {unreviewedQuarter.year} hasn't been reviewed yet
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Complete your quarterly review to archive your progress and carry forward quests.
+              </p>
+            </div>
+            <span className="text-xs text-gold opacity-0 group-hover:opacity-100 transition-opacity">
+              Start Review →
+            </span>
+          </div>
+        </button>
+      )}
+
+      <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 border-border">
+          {reviewOpen && unreviewedQuarter && (
+            <QuarterlyReviewModal
+              quarterLabel={unreviewedQuarter.quarter}
+              year={unreviewedQuarter.year}
+              onClose={() => setReviewOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
