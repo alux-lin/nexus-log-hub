@@ -4,7 +4,7 @@ import { Eye, Plus, Sparkles, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentVision, useAllVisions, useSaveVision, useStartQuest } from "@/hooks/usePlayerData";
-import { useUnreviewedQuarter, useArchivedReviews } from "@/hooks/useQuarterlyReview";
+import { useUnreviewedQuarter, useArchivedReviews, type ManifestoData } from "@/hooks/useQuarterlyReview";
 import { useToast } from "@/hooks/use-toast";
 import { RitualStepper } from "@/components/visions/RitualStepper";
 import { PnvSanctuary, type PnvData } from "@/components/visions/PnvSanctuary";
