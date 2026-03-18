@@ -7,6 +7,7 @@ import { useProfile } from "@/hooks/usePlayerData";
 import { Loader2, HelpCircle } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
+import { GuidedVisionTutorial } from "@/components/tutorial/GuidedVisionTutorial";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface AppLayoutProps {
@@ -17,6 +18,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { session, loading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [guidedOpen, setGuidedOpen] = useState(false);
 
   if (loading || profileLoading) {
     return (
@@ -63,7 +65,16 @@ export function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       <AnimatePresence>
-        {tutorialOpen && <TutorialOverlay onClose={() => setTutorialOpen(false)} />}
+        {tutorialOpen && (
+          <TutorialOverlay
+            onClose={() => setTutorialOpen(false)}
+            onStartGuided={() => {
+              setTutorialOpen(false);
+              setGuidedOpen(true);
+            }}
+          />
+        )}
+        {guidedOpen && <GuidedVisionTutorial onClose={() => setGuidedOpen(false)} />}
       </AnimatePresence>
     </SidebarProvider>
   );

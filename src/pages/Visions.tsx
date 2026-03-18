@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { format, parse } from "date-fns";
-import { Eye, Plus, Sparkles, ScrollText } from "lucide-react";
+import { Eye, Plus, Sparkles, ScrollText, GraduationCap } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentVision, useAllVisions, useSaveVision, useStartQuest } from "@/hooks/usePlayerData";
@@ -11,6 +12,7 @@ import { PnvSanctuary, type PnvData } from "@/components/visions/PnvSanctuary";
 import { GoalExtraction, type QuestDraft } from "@/components/visions/GoalExtraction";
 import { RitualCommitment } from "@/components/visions/RitualCommitment";
 import { QuarterlyReviewModal } from "@/components/review/QuarterlyReviewModal";
+import { GuidedVisionTutorial } from "@/components/tutorial/GuidedVisionTutorial";
 
 function getDefaultQuarter() {
   const now = new Date();
@@ -47,6 +49,7 @@ export default function Visions() {
   const [reviewQuarter, setReviewQuarter] = useState<{ q: string; y: number } | null>(null);
   const [reviewArchivedData, setReviewArchivedData] = useState<any>(null);
   const [autoPrompted, setAutoPrompted] = useState(false);
+  const [guidedOpen, setGuidedOpen] = useState(false);
 
   // Auto-prompt for unreviewed quarter
   useEffect(() => {
@@ -113,6 +116,15 @@ export default function Visions() {
   const pastVisions = allVisions?.filter(
     (v) => !(v.quarter_label === defaults.quarter && v.year === defaults.year)
   );
+
+  // ── Guided Tutorial ──
+  if (guidedOpen) {
+    return (
+      <AnimatePresence>
+        <GuidedVisionTutorial onClose={() => setGuidedOpen(false)} />
+      </AnimatePresence>
+    );
+  }
 
   // ── Review Mode ──
   if (reviewOpen && reviewQuarter) {
@@ -181,9 +193,19 @@ export default function Visions() {
             </p>
           </div>
         </div>
-        <Button onClick={() => openWizard()} size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">
-          <Plus className="w-4 h-4 mr-1" /> New Quarter
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setGuidedOpen(true)}
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-gold"
+          >
+            <GraduationCap className="w-4 h-4 mr-1" /> Tutorial
+          </Button>
+          <Button onClick={() => openWizard()} size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">
+            <Plus className="w-4 h-4 mr-1" /> New Quarter
+          </Button>
+        </div>
       </div>
 
       {/* Current Quarter */}
