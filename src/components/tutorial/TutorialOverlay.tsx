@@ -103,14 +103,25 @@ export function TutorialOverlay({ onClose, onStartGuided }: TutorialOverlayProps
 
           {/* Navigate to page hint */}
           {current.id !== "welcome" && (
-            <Link
-              to={current.page}
-              onClick={handleFinish}
-              className="inline-flex items-center gap-1.5 text-xs text-gold hover:text-gold/80 transition-colors mb-4"
-            >
-              <MapPin className="w-3 h-3" />
-              Go to {current.title} →
-            </Link>
+            <div className="flex items-center gap-4 mb-4">
+              <Link
+                to={current.page}
+                onClick={handleFinish}
+                className="inline-flex items-center gap-1.5 text-xs text-gold hover:text-gold/80 transition-colors"
+              >
+                <MapPin className="w-3 h-3" />
+                Go to {current.title} →
+              </Link>
+              {current.id === "visions" && onStartGuided && (
+                <button
+                  onClick={() => { handleFinish(); onStartGuided(); }}
+                  className="inline-flex items-center gap-1.5 text-xs text-gold hover:text-gold/80 transition-colors border border-gold/30 rounded-md px-2 py-1"
+                >
+                  <GraduationCap className="w-3 h-3" />
+                  Try Guided Tutorial
+                </button>
+              )}
+            </div>
           )}
         </div>
 
