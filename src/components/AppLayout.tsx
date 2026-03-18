@@ -7,6 +7,7 @@ import { useProfile } from "@/hooks/usePlayerData";
 import { Loader2, HelpCircle } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
+import { GuidedVisionTutorial } from "@/components/tutorial/GuidedVisionTutorial";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface AppLayoutProps {
