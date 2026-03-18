@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { format, parse } from "date-fns";
-import { Eye, Plus, Sparkles, ScrollText } from "lucide-react";
+import { Eye, Plus, Sparkles, ScrollText, GraduationCap } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentVision, useAllVisions, useSaveVision, useStartQuest } from "@/hooks/usePlayerData";
@@ -11,6 +12,7 @@ import { PnvSanctuary, type PnvData } from "@/components/visions/PnvSanctuary";
 import { GoalExtraction, type QuestDraft } from "@/components/visions/GoalExtraction";
 import { RitualCommitment } from "@/components/visions/RitualCommitment";
 import { QuarterlyReviewModal } from "@/components/review/QuarterlyReviewModal";
+import { GuidedVisionTutorial } from "@/components/tutorial/GuidedVisionTutorial";
 
 function getDefaultQuarter() {
   const now = new Date();
