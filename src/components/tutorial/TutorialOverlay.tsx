@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, MapPin, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { tutorialSteps } from "./tutorialSteps";
