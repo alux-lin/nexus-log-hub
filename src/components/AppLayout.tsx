@@ -1,10 +1,13 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/usePlayerData";
-import { Loader2 } from "lucide-react";
+import { Loader2, HelpCircle } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface AppLayoutProps {
   children: ReactNode;
