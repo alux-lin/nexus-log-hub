@@ -49,6 +49,7 @@ export default function Visions() {
   const [reviewQuarter, setReviewQuarter] = useState<{ q: string; y: number } | null>(null);
   const [reviewArchivedData, setReviewArchivedData] = useState<any>(null);
   const [autoPrompted, setAutoPrompted] = useState(false);
+  const [guidedOpen, setGuidedOpen] = useState(false);
 
   // Auto-prompt for unreviewed quarter
   useEffect(() => {
