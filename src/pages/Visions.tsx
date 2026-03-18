@@ -193,9 +193,19 @@ export default function Visions() {
             </p>
           </div>
         </div>
-        <Button onClick={() => openWizard()} size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">
-          <Plus className="w-4 h-4 mr-1" /> New Quarter
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setGuidedOpen(true)}
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-gold"
+          >
+            <GraduationCap className="w-4 h-4 mr-1" /> Tutorial
+          </Button>
+          <Button onClick={() => openWizard()} size="sm" className="bg-gold text-gold-foreground hover:bg-gold/90">
+            <Plus className="w-4 h-4 mr-1" /> New Quarter
+          </Button>
+        </div>
       </div>
 
       {/* Current Quarter */}
