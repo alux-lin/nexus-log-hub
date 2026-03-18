@@ -16,6 +16,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const { session, loading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
+  const [tutorialOpen, setTutorialOpen] = useState(false);
 
   if (loading || profileLoading) {
     return (
@@ -42,12 +43,28 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Top bar */}
           <header className="h-12 flex items-center border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10 px-4">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+            <div className="flex-1" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setTutorialOpen(true)}
+                  className="p-1.5 rounded-md text-muted-foreground hover:text-gold hover:bg-secondary transition-colors"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">App Tutorial</TooltipContent>
+            </Tooltip>
           </header>
           <main className="flex-1 overflow-auto scrollbar-dark">
             {children}
           </main>
         </div>
       </div>
+
+      <AnimatePresence>
+        {tutorialOpen && <TutorialOverlay onClose={() => setTutorialOpen(false)} />}
+      </AnimatePresence>
     </SidebarProvider>
   );
 }
