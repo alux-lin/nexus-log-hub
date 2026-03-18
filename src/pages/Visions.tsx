@@ -117,6 +117,15 @@ export default function Visions() {
     (v) => !(v.quarter_label === defaults.quarter && v.year === defaults.year)
   );
 
+  // ── Guided Tutorial ──
+  if (guidedOpen) {
+    return (
+      <AnimatePresence>
+        <GuidedVisionTutorial onClose={() => setGuidedOpen(false)} />
+      </AnimatePresence>
+    );
+  }
+
   // ── Review Mode ──
   if (reviewOpen && reviewQuarter) {
     return (
