@@ -18,6 +18,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { session, loading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [guidedOpen, setGuidedOpen] = useState(false);
 
   if (loading || profileLoading) {
     return (
