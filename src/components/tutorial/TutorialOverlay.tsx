@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 
 interface TutorialOverlayProps {
   onClose: () => void;
+  onStartGuided?: () => void;
 }
 
-export function TutorialOverlay({ onClose }: TutorialOverlayProps) {
+export function TutorialOverlay({ onClose, onStartGuided }: TutorialOverlayProps) {
   const [step, setStep] = useState(0);
   const current = tutorialSteps[step];
   const isFirst = step === 0;
