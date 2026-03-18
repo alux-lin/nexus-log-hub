@@ -65,7 +65,16 @@ export function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       <AnimatePresence>
-        {tutorialOpen && <TutorialOverlay onClose={() => setTutorialOpen(false)} />}
+        {tutorialOpen && (
+          <TutorialOverlay
+            onClose={() => setTutorialOpen(false)}
+            onStartGuided={() => {
+              setTutorialOpen(false);
+              setGuidedOpen(true);
+            }}
+          />
+        )}
+        {guidedOpen && <GuidedVisionTutorial onClose={() => setGuidedOpen(false)} />}
       </AnimatePresence>
     </SidebarProvider>
   );
