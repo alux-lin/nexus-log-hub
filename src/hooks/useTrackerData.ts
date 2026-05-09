@@ -158,7 +158,7 @@ export function useCreateRewardItem() {
       title: string;
       rarity: string;
       reward_type: string;
-      reward_payload?: Record<string, unknown> | null;
+      reward_payload?: Json | null;
       weight?: number;
       is_active?: boolean;
     }) => {
@@ -188,7 +188,7 @@ export function useUpdateRewardItem() {
       title?: string;
       rarity?: string;
       reward_type?: string;
-      reward_payload?: Record<string, unknown> | null;
+      reward_payload?: Json | null;
       weight?: number;
       is_active?: boolean;
     }) => {
