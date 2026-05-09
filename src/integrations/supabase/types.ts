@@ -250,6 +250,94 @@ export type Database = {
           },
         ]
       }
+      reward_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          rarity: string
+          reward_payload: Json | null
+          reward_type: string
+          title: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rarity: string
+          reward_payload?: Json | null
+          reward_type: string
+          title: string
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rarity?: string
+          reward_payload?: Json | null
+          reward_type?: string
+          title?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      reward_log: {
+        Row: {
+          id: string
+          reward_item_id: string | null
+          rolled_at: string
+          tracker_entry_id: string
+          tracker_id: string
+          user_id: string
+          was_winner: boolean
+        }
+        Insert: {
+          id?: string
+          reward_item_id?: string | null
+          rolled_at?: string
+          tracker_entry_id: string
+          tracker_id: string
+          user_id: string
+          was_winner: boolean
+        }
+        Update: {
+          id?: string
+          reward_item_id?: string | null
+          rolled_at?: string
+          tracker_entry_id?: string
+          tracker_id?: string
+          user_id?: string
+          was_winner?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_log_reward_item_id_fkey"
+            columns: ["reward_item_id"]
+            isOneToOne: false
+            referencedRelation: "reward_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_log_tracker_entry_id_fkey"
+            columns: ["tracker_entry_id"]
+            isOneToOne: false
+            referencedRelation: "tracker_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_log_tracker_id_fkey"
+            columns: ["tracker_id"]
+            isOneToOne: false
+            referencedRelation: "trackers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stat_definitions: {
         Row: {
           archetype_name: string | null
@@ -291,6 +379,162 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      tracker_entries: {
+        Row: {
+          id: string
+          logged_at: string
+          note: string | null
+          tracker_id: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          id?: string
+          logged_at?: string
+          note?: string | null
+          tracker_id: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          id?: string
+          logged_at?: string
+          note?: string | null
+          tracker_id?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_entries_tracker_id_fkey"
+            columns: ["tracker_id"]
+            isOneToOne: false
+            referencedRelation: "trackers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracker_milestones: {
+        Row: {
+          id: string
+          reward_text: string
+          threshold_percent: number
+          tracker_id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          reward_text: string
+          threshold_percent: number
+          tracker_id: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          reward_text?: string
+          threshold_percent?: number
+          tracker_id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_milestones_tracker_id_fkey"
+            columns: ["tracker_id"]
+            isOneToOne: false
+            referencedRelation: "trackers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracker_reward_overrides: {
+        Row: {
+          excluded: boolean
+          id: string
+          reward_item_id: string
+          tracker_id: string
+          user_id: string
+          weight_override: number | null
+        }
+        Insert: {
+          excluded?: boolean
+          id?: string
+          reward_item_id: string
+          tracker_id: string
+          user_id: string
+          weight_override?: number | null
+        }
+        Update: {
+          excluded?: boolean
+          id?: string
+          reward_item_id?: string
+          tracker_id?: string
+          user_id?: string
+          weight_override?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_reward_overrides_reward_item_id_fkey"
+            columns: ["reward_item_id"]
+            isOneToOne: false
+            referencedRelation: "reward_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_reward_overrides_tracker_id_fkey"
+            columns: ["tracker_id"]
+            isOneToOne: false
+            referencedRelation: "trackers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trackers: {
+        Row: {
+          created_at: string
+          id: string
+          linked_quest_id: string | null
+          quarter_label: string
+          target_value: number
+          title: string
+          unit: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          linked_quest_id?: string | null
+          quarter_label: string
+          target_value: number
+          title: string
+          unit: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          linked_quest_id?: string | null
+          quarter_label?: string
+          target_value?: number
+          title?: string
+          unit?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trackers_linked_quest_id_fkey"
+            columns: ["linked_quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
