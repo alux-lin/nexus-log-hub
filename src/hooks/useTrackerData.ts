@@ -44,9 +44,11 @@ export function useCreateTracker() {
       unit: string;
       target_value: number;
       linked_quest_id?: string | null;
+      quarter_label?: string;
+      year?: number;
       milestones?: MilestoneInput[];
     }) => {
-      const { quarter, year } = getCurrentQuarter();
+      const defaults = getCurrentQuarter();
       const { data: tracker, error } = await supabase
         .from("trackers")
         .insert({
@@ -55,8 +57,8 @@ export function useCreateTracker() {
           unit: input.unit,
           target_value: input.target_value,
           linked_quest_id: input.linked_quest_id ?? null,
-          quarter_label: quarter,
-          year,
+          quarter_label: input.quarter_label ?? defaults.quarter,
+          year: input.year ?? defaults.year,
         })
         .select()
         .single();
