@@ -1,43 +1,35 @@
-## Polish the Google OAuth Sign-In Experience
+## Plan: Add `src/lib/rewardRoll.ts`
 
-Right now users see an unbranded redirect during Google sign-in — the Supabase callback URL (`kmwhipmonetbinddttos.supabase.co`) flashes in the address bar, and the final redirect lands on the root route with no loading state. We can fix this in two layers: **code** (a branded callback page) and **configuration** (Google Cloud Console + Supabase dashboard).
+Create a new pure-logic module (no React, no Supabase imports) for reward rolling.
 
-### Code changes
+### File: `src/lib/rewardRoll.ts`
 
-**1. Add a branded `/auth/callback` page** (`src/pages/AuthCallback.tsx`)
-- Shows a centered Nexus Log branded loading spinner with text: "Signing you in..."
-- Uses the existing app aesthetic (dark slate background, gold accent, font-display heading)
-- Calls `supabase.auth.getSession()` on mount and redirects to `/` once the session is detected
-- If no session appears after a timeout, shows an error with a "Back to Sign In" button
+**Types** (defined locally, derived from the existing `reward_items` and `tracker_reward_overrides` tables):
+- `RewardItem` — `{ id: string; rarity: string; weight: number; is_active?: boolean; ... }` (use a structural type matching the Supabase row).
+- `TrackerRewardOverride` — `{ reward_item_id: string; excluded: boolean; weight_override: number | null }`.
+- `RarityMultipliers` — `Record<string, number>`, with default `{ common: 1.0, rare: 0.4, legendary: 0.15 }`.
 
-**2. Update `src/App.tsx`**
-- Add a new route: `<Route path="/auth/callback" element={<AuthCallback />} />`
+**Exports:**
 
-**3. Update `src/pages/Auth.tsx`**
-- Change the Google sign-in `redirectTo` from `window.location.origin + "/"` to `window.location.origin + "/auth/callback"`
+1. `getEffectiveWeight(item, overrides, rarityMultipliers)` → `number`
+   - Find override for `item.id`.
+   - Base weight = `override.weight_override ?? item.weight`.
+   - Multiplier = `rarityMultipliers[item.rarity] ?? 1.0`.
+   - Return `base * multiplier`.
+   - Returns `0` if the item is excluded (caller filters first, but safe fallback).
 
-### Configuration changes (user action required)
+2. `rollReward({ rewardItems, overrides, baseFireRate = 0.35 })` → `RewardItem | null`
+   - **Stage 1**: if `Math.random() >= baseFireRate`, return `null`.
+   - **Stage 2**: build eligible pool: filter out items where `is_active === false` or where override has `excluded: true`.
+   - Compute effective weight for each via `getEffectiveWeight`.
+   - Drop items with `weight <= 0`.
+   - If pool is empty, return `null`.
+   - Weighted random: sum weights, pick `Math.random() * total`, walk pool subtracting until threshold crossed, return that item.
 
-These can't be automated via code, but the plan includes the exact steps:
+### Constraints
+- No imports from `react`, `@/integrations/supabase/*`, or any hook/component.
+- Pure functions; `Math.random()` is the only side effect (acceptable per spec).
+- Default rarity multipliers exported as a const so tests can reuse them.
 
-**Google Cloud Console** — Polish the consent screen:
-- Go to **APIs & Services → OAuth consent screen**
-- Set **App name** to "Nexus Log"
-- Add a support email and app logo (optional but recommended)
-- Under **Authorized domains**, add:
-  - `lovable.app`
-  - `nexus-log-keeper.lovable.app`
-
-**Supabase Dashboard** — Ensure clean redirects:
-- Go to **Authentication → URL Configuration**
-- **Site URL**: `https://nexus-log-keeper.lovable.app`
-- **Redirect URLs**: add both `https://nexus-log-keeper.lovable.app/**` and the preview URL `https://id-preview--774f1547-4fa4-4640-a6db-194ee193d1f0.lovable.app/**`
-
-### What the user will see after
-
-1. Clicks "Continue with Google"
-2. Google's consent screen shows "Nexus Log" as the app name
-3. After approval, lands on a branded Nexus Log page: "Signing you in..." with a spinner
-4. Seamlessly redirected to the Dashboard
-
-No more raw Supabase URLs visible to the user.
+### Out of scope
+- No call sites updated. No tests added (existing `src/test/example.test.ts` left untouched). No DB or hook changes.
