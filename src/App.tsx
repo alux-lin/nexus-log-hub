@@ -10,6 +10,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import QuestLog from "./pages/QuestLog";
+import Trackers from "./pages/Trackers";
 import Inventory from "./pages/Inventory";
 import Visions from "./pages/Visions";
 import Settings from "./pages/Settings";
@@ -41,6 +42,14 @@ const App = () => (
               element={
                 <AppLayout>
                   <QuestLog />
+                </AppLayout>
+              }
+            />
+            <Route
+              path="/trackers"
+              element={
+                <AppLayout>
+                  <Trackers />
                 </AppLayout>
               }
             />
