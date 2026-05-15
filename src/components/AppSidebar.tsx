@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, ScrollText, Package, Eye, Settings, Sword, LogOut, ChevronRight, Sparkles } from "lucide-react";
+import { LayoutDashboard, ScrollText, Target, Package, Eye, Settings, Sword, LogOut, ChevronRight, Sparkles } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { title: "Dashboard",  url: "/",          icon: LayoutDashboard },
   { title: "Quest Log",  url: "/quests",    icon: ScrollText },
+  { title: "Trackers",   url: "/trackers",  icon: Target },
   { title: "Inventory",  url: "/inventory", icon: Package },
   { title: "Visions",    url: "/visions",   icon: Eye },
   { title: "Settings",   url: "/settings",  icon: Settings },
